@@ -12,6 +12,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import BusinessProfiles from "@/pages/business/BusinessProfiles";
 import BusinessForm from "@/pages/business/BusinessForm";
+import BusinessDetails from "@/pages/business/BusinessDetails";
 import Products from "@/pages/products/Products";
 import ProductForm from "@/pages/products/ProductForm";
 import Catalogs from "@/pages/catalogs/Catalogs";
@@ -42,6 +43,7 @@ function App() {
               <Route path="/" component={Dashboard} />
               <Route path="/businesses" component={BusinessProfiles} />
               <Route path="/businesses/new" component={BusinessForm} />
+              <Route path="/businesses/:id" component={BusinessDetails} />
               <Route path="/businesses/:id/edit" component={BusinessForm} />
               <Route path="/products" component={Products} />
               <Route path="/products/new" component={ProductForm} />

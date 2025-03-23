@@ -135,24 +135,33 @@ export default function BusinessProfiles() {
                   <p className="text-sm text-gray-500">{business.contactPhone}</p>
                 )}
               </CardContent>
-              <CardFooter className="flex justify-end gap-2">
+              <CardFooter className="flex justify-between gap-2">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  onClick={() => navigate(`/businesses/${business.id}/edit`)}
+                  onClick={() => navigate(`/businesses/${business.id}`)}
                 >
-                  <EditIcon className="h-4 w-4 mr-2" />
-                  Edit
+                  View Details
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
-                  onClick={() => handleDelete(business.id)}
-                >
-                  <Trash2Icon className="h-4 w-4 mr-2" />
-                  Delete
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/businesses/${business.id}/edit`)}
+                  >
+                    <EditIcon className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                    onClick={() => handleDelete(business.id)}
+                  >
+                    <Trash2Icon className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           ))}
