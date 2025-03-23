@@ -43,7 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Business Routes
   app.get("/api/businesses", async (_req, res) => {
     try {
-      const businesses = await storage.getBusinesses();
+      const businesses = await dataStorage.getBusinesses();
       res.json(businesses);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch businesses" });
@@ -53,7 +53,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/businesses/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const business = await storage.getBusiness(id);
+      const business = await dataStorage.getBusiness(id);
       
       if (!business) {
         return res.status(404).json({ message: "Business not found" });
@@ -76,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const business = await storage.createBusiness(validation.data);
+      const business = await dataStorage.createBusiness(validation.data);
       res.status(201).json(business);
     } catch (error) {
       res.status(500).json({ message: "Failed to create business" });
@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const updatedBusiness = await storage.updateBusiness(id, validation.data);
+      const updatedBusiness = await dataStorage.updateBusiness(id, validation.data);
       
       if (!updatedBusiness) {
         return res.status(404).json({ message: "Business not found" });
@@ -110,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/businesses/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteBusiness(id);
+      const deleted = await dataStorage.deleteBusiness(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Business not found" });
@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parseInt(req.query.businessId as string) : 
         undefined;
       
-      const products = await storage.getProducts(businessId);
+      const products = await dataStorage.getProducts(businessId);
       res.json(products);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch products" });
@@ -139,7 +139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const product = await storage.getProduct(id);
+      const product = await dataStorage.getProduct(id);
       
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const product = await storage.createProduct(validation.data);
+      const product = await dataStorage.createProduct(validation.data);
       res.status(201).json(product);
     } catch (error) {
       res.status(500).json({ message: "Failed to create product" });
@@ -181,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const updatedProduct = await storage.updateProduct(id, validation.data);
+      const updatedProduct = await dataStorage.updateProduct(id, validation.data);
       
       if (!updatedProduct) {
         return res.status(404).json({ message: "Product not found" });
@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteProduct(id);
+      const deleted = await dataStorage.deleteProduct(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Product not found" });
@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Template Routes
   app.get("/api/templates", async (_req, res) => {
     try {
-      const templates = await storage.getTemplates();
+      const templates = await dataStorage.getTemplates();
       res.json(templates);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch templates" });
@@ -221,7 +221,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/templates/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const template = await storage.getTemplate(id);
+      const template = await dataStorage.getTemplate(id);
       
       if (!template) {
         return res.status(404).json({ message: "Template not found" });
@@ -244,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const template = await storage.createTemplate(validation.data);
+      const template = await dataStorage.createTemplate(validation.data);
       res.status(201).json(template);
     } catch (error) {
       res.status(500).json({ message: "Failed to create template" });
@@ -263,7 +263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const updatedTemplate = await storage.updateTemplate(id, validation.data);
+      const updatedTemplate = await dataStorage.updateTemplate(id, validation.data);
       
       if (!updatedTemplate) {
         return res.status(404).json({ message: "Template not found" });
@@ -278,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/templates/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteTemplate(id);
+      const deleted = await dataStorage.deleteTemplate(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Template not found" });
@@ -297,7 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parseInt(req.query.businessId as string) : 
         undefined;
       
-      const catalogs = await storage.getCatalogs(businessId);
+      const catalogs = await dataStorage.getCatalogs(businessId);
       res.json(catalogs);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch catalogs" });
@@ -307,7 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/catalogs/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const catalog = await storage.getCatalog(id);
+      const catalog = await dataStorage.getCatalog(id);
       
       if (!catalog) {
         return res.status(404).json({ message: "Catalog not found" });
@@ -330,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const catalog = await storage.createCatalog(validation.data);
+      const catalog = await dataStorage.createCatalog(validation.data);
       res.status(201).json(catalog);
     } catch (error) {
       res.status(500).json({ message: "Failed to create catalog" });
@@ -349,7 +349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const updatedCatalog = await storage.updateCatalog(id, validation.data);
+      const updatedCatalog = await dataStorage.updateCatalog(id, validation.data);
       
       if (!updatedCatalog) {
         return res.status(404).json({ message: "Catalog not found" });
@@ -364,7 +364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/catalogs/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const deleted = await storage.deleteCatalog(id);
+      const deleted = await dataStorage.deleteCatalog(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Catalog not found" });
@@ -452,7 +452,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Import the products
       const importedProducts = [];
       for (const product of validatedProducts) {
-        const importedProduct = await storage.createProduct(product);
+        const importedProduct = await dataStorage.createProduct(product);
         importedProducts.push(importedProduct);
       }
 
@@ -469,7 +469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/catalogs/:id/pdf", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const catalog = await storage.getCatalog(id);
+      const catalog = await dataStorage.getCatalog(id);
       
       if (!catalog) {
         return res.status(404).json({ message: "Catalog not found" });
@@ -489,10 +489,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard stats endpoint
   app.get("/api/dashboard/stats", async (_req, res) => {
     try {
-      const businesses = await storage.getBusinesses();
-      const products = await storage.getProducts();
-      const catalogs = await storage.getCatalogs();
-      const templates = await storage.getTemplates();
+      const businesses = await dataStorage.getBusinesses();
+      const products = await dataStorage.getProducts();
+      const catalogs = await dataStorage.getCatalogs();
+      const templates = await dataStorage.getTemplates();
       
       res.json({
         totalBusinesses: businesses.length,
