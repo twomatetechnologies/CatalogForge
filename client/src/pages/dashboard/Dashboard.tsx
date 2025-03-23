@@ -174,10 +174,10 @@ export default function Dashboard() {
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                         <Link href={`/catalogs/${catalog.id}/edit`}>
-                          <a className="text-primary-600 hover:text-primary-800 mr-3">Edit</a>
+                          <div className="inline-block text-primary-600 hover:text-primary-800 mr-3 cursor-pointer">Edit</div>
                         </Link>
                         <Link href={`/api/catalogs/${catalog.id}/pdf`} target="_blank">
-                          <a className="text-primary-600 hover:text-primary-800 mr-3">PDF</a>
+                          <div className="inline-block text-primary-600 hover:text-primary-800 mr-3 cursor-pointer">PDF</div>
                         </Link>
                         <button className="text-gray-500 hover:text-gray-700">
                           <MoreHorizontalIcon className="h-5 w-5" />
@@ -190,9 +190,9 @@ export default function Dashboard() {
                     <td colSpan={6} className="px-4 py-6 text-center text-sm text-gray-500">
                       No catalogs found. 
                       <Link href="/catalogs/new">
-                        <a className="text-primary-600 hover:text-primary-800 ml-1">
+                        <div className="inline-block text-primary-600 hover:text-primary-800 ml-1 cursor-pointer">
                           Create your first catalog
-                        </a>
+                        </div>
                       </Link>
                     </td>
                   </tr>
@@ -210,7 +210,7 @@ export default function Dashboard() {
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-800">Templates</h3>
             <Link href="/templates">
-              <a className="text-sm text-primary-600 hover:text-primary-700">View All</a>
+              <div className="text-sm text-primary-600 hover:text-primary-700 cursor-pointer">View All</div>
             </Link>
           </div>
           <div className="p-4">
@@ -242,7 +242,7 @@ export default function Dashboard() {
           <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-gray-800">Recent Products</h3>
             <Link href="/products">
-              <a className="text-sm text-primary-600 hover:text-primary-700">View All</a>
+              <div className="text-sm text-primary-600 hover:text-primary-700 cursor-pointer">View All</div>
             </Link>
           </div>
           <div className="p-4">
@@ -270,9 +270,9 @@ export default function Dashboard() {
                 <li className="py-6 text-center text-sm text-gray-500">
                   No products found. 
                   <Link href="/products/new">
-                    <a className="text-primary-600 hover:text-primary-800 ml-1">
+                    <div className="inline-block text-primary-600 hover:text-primary-800 ml-1 cursor-pointer">
                       Add your first product
-                    </a>
+                    </div>
                   </Link>
                 </li>
               )}
