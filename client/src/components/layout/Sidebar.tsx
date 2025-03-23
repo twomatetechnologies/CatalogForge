@@ -59,9 +59,9 @@ export default function Sidebar() {
           {navItems.map((item) => (
             <li key={item.href}>
               <Link href={item.href}>
-                <a
+                <div
                   className={cn(
-                    "flex items-center space-x-2 px-3 py-2 rounded-lg",
+                    "flex items-center space-x-2 px-3 py-2 rounded-lg cursor-pointer",
                     location === item.href
                       ? "bg-primary-50 text-primary-700"
                       : "text-gray-700 hover:bg-gray-100"
@@ -69,7 +69,7 @@ export default function Sidebar() {
                 >
                   {item.icon}
                   <span>{item.label}</span>
-                </a>
+                </div>
               </Link>
             </li>
           ))}
@@ -84,7 +84,7 @@ export default function Sidebar() {
               {filteredBusinesses.map((business) => (
                 <li key={business.id}>
                   <Link href={`/businesses/${business.id}/edit`}>
-                    <a className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100">
+                    <div className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 cursor-pointer">
                       <div className={cn(
                         "h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium",
                         randomColor()
@@ -92,7 +92,7 @@ export default function Sidebar() {
                         {getInitials(business.name)}
                       </div>
                       <span>{business.name}</span>
-                    </a>
+                    </div>
                   </Link>
                 </li>
               ))}
