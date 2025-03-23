@@ -1013,7 +1013,7 @@ export default function CatalogEditor() {
                         </div>
                         <div>
                           <label className="text-xs text-gray-500">Text Size</label>
-                          <Select defaultValue="medium">
+                          <Select value="medium" defaultValue="medium">
                             <SelectTrigger>
                               <SelectValue placeholder="Text size" />
                             </SelectTrigger>
