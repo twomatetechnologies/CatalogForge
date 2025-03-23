@@ -985,7 +985,7 @@ export default function CatalogEditor() {
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Typography</label>
                     <div className="space-y-2">
-                      <Select defaultValue="inter">
+                      <Select value="inter" defaultValue="inter">
                         <SelectTrigger>
                           <SelectValue placeholder="Select font family" />
                         </SelectTrigger>
@@ -1000,7 +1000,7 @@ export default function CatalogEditor() {
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <label className="text-xs text-gray-500">Header Size</label>
-                          <Select defaultValue="medium">
+                          <Select value="medium" defaultValue="medium">
                             <SelectTrigger>
                               <SelectValue placeholder="Header size" />
                             </SelectTrigger>
