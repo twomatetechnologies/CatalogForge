@@ -75,7 +75,7 @@ export default function Products() {
     queryKey: ["/api/products", selectedBusinessId],
     queryFn: async ({ queryKey }) => {
       const [_, businessId] = queryKey;
-      const url = businessId
+      const url = businessId && businessId !== "all"
         ? `/api/products?businessId=${businessId}`
         : "/api/products";
       const res = await fetch(url, { credentials: "include" });
@@ -269,7 +269,7 @@ export default function Products() {
                 <SelectValue placeholder="All Businesses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Businesses</SelectItem>
+                <SelectItem value="all">All Businesses</SelectItem>
                 {businesses.map((business) => (
                   <SelectItem key={business.id} value={business.id.toString()}>
                     {business.name}

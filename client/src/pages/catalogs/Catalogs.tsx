@@ -61,7 +61,7 @@ export default function Catalogs() {
     queryKey: ["/api/catalogs", selectedBusinessId],
     queryFn: async ({ queryKey }) => {
       const [_, businessId] = queryKey;
-      const url = businessId
+      const url = businessId && businessId !== "all"
         ? `/api/catalogs?businessId=${businessId}`
         : "/api/catalogs";
       const res = await fetch(url, { credentials: "include" });
@@ -193,7 +193,7 @@ export default function Catalogs() {
                 <SelectValue placeholder="All Businesses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Businesses</SelectItem>
+                <SelectItem value="all">All Businesses</SelectItem>
                 {businesses.map((business) => (
                   <SelectItem key={business.id} value={business.id.toString()}>
                     {business.name}
