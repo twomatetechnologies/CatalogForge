@@ -469,5 +469,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dashboard stats endpoint
+  app.get("/api/dashboard/stats", async (_req, res) => {
+    try {
+      const businesses = await storage.getBusinesses();
+      const products = await storage.getProducts();
+      const catalogs = await storage.getCatalogs();
+      const templates = await storage.getTemplates();
+      
+      res.json({
+        totalBusinesses: businesses.length,
+        totalProducts: products.length,
+        totalCatalogs: catalogs.length,
+        totalTemplates: templates.length,
+        activeProducts: products.filter(p => p.active).length,
+        totalDownloads: 0 // Placeholder for demo
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
   return httpServer;
 }
