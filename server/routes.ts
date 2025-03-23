@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { storage } from "./storage";
+import { storage as dataStorage } from "./storage";
 import { 
   insertBusinessSchema, 
   insertProductSchema, 
@@ -12,9 +12,25 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+
 const upload = multer({
-  storage: multer.memoryStorage(),
+  storage,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
   },
@@ -367,15 +383,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      // For this prototype, we'll simulate a successful upload
-      // In a real app, we would save the file to disk or S3
-      const imageUrl = `/uploads/${Date.now()}-${req.file.originalname}`;
+      // Return the path to the uploaded file
+      const imageUrl = `/uploads/${req.file.filename}`;
       
       res.json({ 
         url: imageUrl,
         success: true 
       });
     } catch (error) {
+      console.error("Upload error:", error);
       res.status(500).json({ message: "Failed to upload file" });
     }
   });
@@ -395,8 +411,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Business ID is required" });
       }
 
-      // Simulate import parsing (in a real app we would parse the file)
-      const fileContent = req.file.buffer.toString();
+      // Read file content from disk
+      const filePath = req.file.path;
+      const fileContent = fs.readFileSync(filePath, 'utf8');
       const fileType = path.extname(req.file.originalname).toLowerCase();
       
       let products = [];
