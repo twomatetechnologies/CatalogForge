@@ -31,10 +31,14 @@ export const products = pgTable("products", {
   tags: jsonb("tags").$type<string[]>(),
   variations: jsonb("variations"),
   active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Template Schema

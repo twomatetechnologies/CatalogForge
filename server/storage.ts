@@ -109,7 +109,13 @@ export class MemStorage implements IStorage {
 
   async createProduct(product: InsertProduct): Promise<Product> {
     const id = this.currentProductId++;
-    const newProduct: Product = { ...product, id };
+    const now = new Date();
+    const newProduct: Product = { 
+      ...product, 
+      id, 
+      createdAt: now,
+      updatedAt: now 
+    };
     this.products.set(id, newProduct);
     return newProduct;
   }
@@ -118,7 +124,11 @@ export class MemStorage implements IStorage {
     const existingProduct = this.products.get(id);
     if (!existingProduct) return undefined;
 
-    const updatedProduct = { ...existingProduct, ...product };
+    const updatedProduct = { 
+      ...existingProduct, 
+      ...product, 
+      updatedAt: new Date() 
+    };
     this.products.set(id, updatedProduct);
     return updatedProduct;
   }

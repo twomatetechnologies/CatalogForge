@@ -14,28 +14,88 @@ export async function importProductsFromCSV(
   businessId: number
 ): Promise<ImportResult<Product>> {
   try {
-    // In a real implementation, we would use a CSV parsing library
-    // For this prototype, we'll just simulate parsing a CSV
+    const text = await file.text();
+    const lines = text.split('\n');
     
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    if (lines.length < 2) {
+      throw new Error('CSV file must have a header row and at least one data row');
+    }
     
-    // This is a placeholder for CSV parsing logic
-    // In a real application, we would parse the CSV data
+    // Parse the header row to determine column positions
+    const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+    
+    // Get column indexes
+    const nameIndex = header.indexOf('name');
+    const descriptionIndex = header.indexOf('description');
+    const skuIndex = header.indexOf('sku');
+    const priceIndex = header.indexOf('price');
+    const categoryIndex = header.indexOf('category');
+    const tagsIndex = header.indexOf('tags');
+    const activeIndex = header.indexOf('active');
+    
+    // Validate required columns
+    if (nameIndex === -1) {
+      throw new Error('CSV file must contain a "name" column');
+    }
+    
+    // Parse each data row
     const result: ImportResult<Product> = {
       data: [],
       errors: [],
-      totalRows: 0,
+      totalRows: lines.length - 1, // Exclude header row
       successRows: 0
     };
     
-    // Simulate some errors and successful imports
-    result.errors.push('CSV import is simulated in this prototype');
+    // Process each row (skip header)
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue; // Skip empty lines
+      
+      try {
+        // Split the line and respect quoted values
+        const row = lines[i].split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
+        
+        // Create a product object
+        const product: Partial<Product> = {
+          businessId,
+          id: 0, // ID will be assigned by the server
+          name: nameIndex >= 0 ? row[nameIndex] : '',
+          active: true // Default to active
+        };
+        
+        // Add optional fields if available
+        if (descriptionIndex >= 0) product.description = row[descriptionIndex];
+        if (skuIndex >= 0) product.sku = row[skuIndex];
+        if (priceIndex >= 0) product.price = row[priceIndex];
+        if (categoryIndex >= 0) product.category = row[categoryIndex];
+        
+        // Process tags - comma-separated string of tags
+        if (tagsIndex >= 0 && row[tagsIndex]) {
+          product.tags = row[tagsIndex].split(';').map(tag => tag.trim());
+        }
+        
+        // Process active status
+        if (activeIndex >= 0) {
+          const activeValue = row[activeIndex].toLowerCase();
+          product.active = !(activeValue === 'false' || activeValue === 'no' || activeValue === '0');
+        }
+        
+        // Validate required fields
+        if (!product.name) {
+          result.errors.push(`Row ${i}: Missing required field 'name'`);
+          continue;
+        }
+        
+        result.data.push(product as Product);
+        result.successRows++;
+      } catch (e: any) {
+        result.errors.push(`Row ${i}: ${e.message || 'Invalid format'}`);
+      }
+    }
     
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error importing CSV:', error);
-    throw new Error('Failed to import CSV file');
+    throw new Error(`Failed to import CSV file: ${error.message}`);
   }
 }
 
@@ -85,13 +145,13 @@ export async function importProductsFromJSON(
         
         result.data.push(product);
         result.successRows++;
-      } catch (e) {
+      } catch (e: any) {
         result.errors.push(`Row ${i + 1}: ${e.message || 'Unknown error'}`);
       }
     }
     
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error importing JSON:', error);
     throw new Error(`Failed to import JSON file: ${error.message}`);
   }

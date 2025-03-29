@@ -295,6 +295,8 @@ export default function Products() {
                 <TableHead>Price</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Updated</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -303,7 +305,7 @@ export default function Products() {
                 // Loading state
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i} className="animate-pulse">
-                    <TableCell colSpan={6}>
+                    <TableCell colSpan={8}>
                       <div className="h-10 bg-gray-100 rounded"></div>
                     </TableCell>
                   </TableRow>
@@ -351,6 +353,20 @@ export default function Products() {
                         </span>
                       )}
                     </TableCell>
+                    <TableCell>
+                      {product.createdAt ? (
+                        <span className="text-xs text-gray-500">
+                          {new Date(product.createdAt).toLocaleDateString()}
+                        </span>
+                      ) : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {product.updatedAt ? (
+                        <span className="text-xs text-gray-500">
+                          {new Date(product.updatedAt).toLocaleDateString()}
+                        </span>
+                      ) : "-"}
+                    </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -381,7 +397,7 @@ export default function Products() {
               ) : (
                 // Empty state
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     <div className="flex flex-col items-center">
                       <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
                         <PackageIcon className="h-6 w-6" />

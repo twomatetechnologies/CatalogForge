@@ -42,6 +42,8 @@ export interface Product {
   tags?: string[];
   variations?: ProductVariation[];
   active: boolean;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 export interface ProductVariation {

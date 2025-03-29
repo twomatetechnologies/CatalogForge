@@ -426,8 +426,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Invalid JSON file" });
         }
       } else if (fileType === '.csv') {
-        // In a real app we would parse CSV
-        return res.status(400).json({ message: "CSV import is not implemented in this prototype" });
+        try {
+          const lines = fileContent.split('\n');
+          
+          if (lines.length < 2) {
+            return res.status(400).json({ message: "CSV file must have a header row and at least one data row" });
+          }
+          
+          // Parse the header row to determine column positions
+          const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+          
+          // Get column indexes
+          const nameIndex = header.indexOf('name');
+          const descriptionIndex = header.indexOf('description');
+          const skuIndex = header.indexOf('sku');
+          const priceIndex = header.indexOf('price');
+          const categoryIndex = header.indexOf('category');
+          const tagsIndex = header.indexOf('tags');
+          const activeIndex = header.indexOf('active');
+          
+          // Validate required columns
+          if (nameIndex === -1) {
+            return res.status(400).json({ message: "CSV file must contain a 'name' column" });
+          }
+          
+          // Process each row (skip header)
+          for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue; // Skip empty lines
+            
+            // Split the line and respect quoted values
+            const row = lines[i].split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
+            
+            if (row.length < header.length) continue;
+            
+            // Create a product object
+            const product: any = {
+              businessId: businessId,
+              name: nameIndex >= 0 ? row[nameIndex] : '',
+              active: true // Default to active
+            };
+            
+            // Add optional fields if available
+            if (descriptionIndex >= 0) product.description = row[descriptionIndex];
+            if (skuIndex >= 0) product.sku = row[skuIndex];
+            if (priceIndex >= 0) product.price = row[priceIndex];
+            if (categoryIndex >= 0) product.category = row[categoryIndex];
+            
+            // Process tags - use semicolons as delimiters inside CSV field
+            if (tagsIndex >= 0 && row[tagsIndex]) {
+              product.tags = row[tagsIndex].split(';').map(tag => tag.trim());
+            }
+            
+            // Process active status
+            if (activeIndex >= 0) {
+              const activeValue = row[activeIndex].toLowerCase();
+              product.active = !(activeValue === 'false' || activeValue === 'no' || activeValue === '0');
+            }
+            
+            // Validate required fields
+            if (product.name && product.name.trim() !== '') {
+              products.push(product);
+            }
+          }
+          
+        } catch (e: any) {
+          return res.status(400).json({ message: `CSV parsing error: ${e.message}` });
+        }
       } else {
         return res.status(400).json({ message: "Unsupported file type" });
       }
