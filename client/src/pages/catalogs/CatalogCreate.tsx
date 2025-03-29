@@ -93,10 +93,7 @@ export default function CatalogCreate() {
   // Create catalog mutation
   const createCatalog = useMutation({
     mutationFn: async (values: FormValues) => {
-      return apiRequest('/api/catalogs', {
-        method: 'POST',
-        body: JSON.stringify(values)
-      });
+      return apiRequest('POST', '/api/catalogs', values);
     },
     onSuccess: () => {
       toast({
