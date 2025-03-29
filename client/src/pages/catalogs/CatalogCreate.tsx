@@ -427,8 +427,12 @@ export default function CatalogCreate() {
                               onError={(e) => {
                                 console.log("Image failed to load:", template.thumbnail);
                                 e.currentTarget.onerror = null;
-                                e.currentTarget.src = "";
-                                e.currentTarget.parentElement.innerHTML = '<div class="text-muted-foreground">Template Image Error</div>';
+                                // Try to fix the path by adding a leading '/' if needed
+                                if (template.thumbnail && !template.thumbnail.startsWith('/')) {
+                                  e.currentTarget.src = '/' + template.thumbnail;
+                                } else {
+                                  e.currentTarget.src = "";
+                                }
                               }}
                             />
                           ) : (
