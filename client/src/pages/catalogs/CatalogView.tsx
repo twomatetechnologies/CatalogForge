@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { PDFViewer } from "@/components/PDFViewer";
+import { CatalogPDFViewer } from "@/components/PDFViewer";
 import { Catalog, Product, Template, BusinessProfile } from "@/types";
 
 export default function CatalogView() {

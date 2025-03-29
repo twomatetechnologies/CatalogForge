@@ -452,112 +452,160 @@ export default function CatalogCreate() {
                   <div className="relative flex-grow">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search products..."
+                      placeholder="Search products by name, SKU or description..."
                       className="pl-8"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
                   
-                  <div className="flex gap-2 flex-wrap">
-                    <Button
-                      variant={selectedCategory === null ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleCategoryFilter(null)}
+                  <div className="flex gap-2 items-center">
+                    <select 
+                      className="h-10 rounded-md border border-input px-3 py-2 text-sm"
+                      value={selectedCategory || ""}
+                      onChange={(e) => handleCategoryFilter(e.target.value === "" ? null : e.target.value)}
                     >
-                      All
-                    </Button>
+                      <option value="">All Categories</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
                     
-                    {categories.map((category) => (
-                      <div key={category} className="flex gap-1">
-                        <Button
-                          variant={selectedCategory === category ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleCategoryFilter(category)}
-                        >
-                          {category}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="px-1"
-                          onClick={() => handleSelectAllInCategory(category)}
-                          title="Select all in this category"
-                        >
-                          <CheckIcon className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
+                    {selectedCategory && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSelectAllInCategory(selectedCategory)}
+                        className="whitespace-nowrap"
+                      >
+                        <CheckIcon className="h-4 w-4 mr-1" />
+                        Select All in {selectedCategory}
+                      </Button>
+                    )}
                   </div>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredProducts.map((product: Product) => (
-                      <Card
-                        key={product.id}
-                        className={`cursor-pointer transition-all ${
-                          isProductSelected(product.id)
-                            ? "ring-2 ring-primary" 
-                            : "hover:bg-accent/10"
-                        }`}
-                        onClick={() => toggleProductSelection(product.id)}
-                      >
-                        <div className="relative h-32 overflow-hidden bg-muted">
-                          {product.images && product.images[0] ? (
-                            <img
-                              src={product.images[0]}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
+                <div className="rounded-md border">
+                  <div className="relative w-full overflow-auto">
+                    <table className="w-full caption-bottom text-sm">
+                      <thead className="[&_tr]:border-b">
+                        <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                          <th className="h-12 px-4 text-left align-middle font-medium w-10">
+                            <Checkbox 
+                              checked={
+                                filteredProducts.length > 0 && 
+                                filteredProducts.every((p: Product) => isProductSelected(p.id))
+                              }
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  // Select all filtered products
+                                  const currentSelection = form.getValues("productIds");
+                                  const newIds = filteredProducts.map((p: Product) => p.id);
+                                  const combinedIds = [...new Set([...currentSelection, ...newIds])];
+                                  form.setValue("productIds", combinedIds);
+                                } else {
+                                  // Deselect all filtered products
+                                  const currentSelection = form.getValues("productIds");
+                                  const filteredIds = filteredProducts.map((p: Product) => p.id);
+                                  const remainingIds = currentSelection.filter(id => !filteredIds.includes(id));
+                                  form.setValue("productIds", remainingIds);
+                                }
+                              }}
                             />
-                          ) : (
-                            <div className="flex items-center justify-center h-full text-muted-foreground">
-                              No image
-                            </div>
-                          )}
-                          
-                          {isProductSelected(product.id) && (
-                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-                              <CheckIcon className="h-4 w-4" />
-                            </div>
-                          )}
-                          
-                          {product.category && (
-                            <Badge className="absolute top-2 left-2">
-                              {product.category}
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <CardContent className="p-3">
-                          <div className="font-medium truncate">{product.name}</div>
-                          {product.price && (
-                            <div className="text-sm font-medium">${product.price}</div>
-                          )}
-                          {product.sku && (
-                            <div className="text-xs text-muted-foreground mt-1">
-                              SKU: {product.sku}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+                          </th>
+                          <th className="h-12 w-20 px-4 text-left align-middle font-medium">Image</th>
+                          <th className="h-12 px-4 text-left align-middle font-medium">Name</th>
+                          <th className="h-12 px-4 text-left align-middle font-medium">SKU</th>
+                          <th className="h-12 px-4 text-left align-middle font-medium">Price</th>
+                          <th className="h-12 px-4 text-left align-middle font-medium">Category</th>
+                        </tr>
+                      </thead>
+                      <tbody className="[&_tr:last-child]:border-0">
+                        {filteredProducts.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="p-4 text-center text-muted-foreground">
+                              No products found matching your criteria.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredProducts.map((product: Product) => (
+                            <tr 
+                              key={product.id} 
+                              className={`border-b transition-colors hover:bg-muted/50 ${
+                                isProductSelected(product.id) ? "bg-muted/50" : ""
+                              }`}
+                              onClick={() => toggleProductSelection(product.id)}
+                            >
+                              <td className="p-4 align-middle">
+                                <Checkbox 
+                                  checked={isProductSelected(product.id)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      const currentSelection = form.getValues("productIds");
+                                      form.setValue("productIds", [...currentSelection, product.id]);
+                                    } else {
+                                      const currentSelection = form.getValues("productIds");
+                                      form.setValue("productIds", currentSelection.filter(id => id !== product.id));
+                                    }
+                                  }}
+                                />
+                              </td>
+                              <td className="p-2 align-middle">
+                                <div className="h-12 w-12 overflow-hidden rounded-md bg-muted">
+                                  {product.images && product.images[0] ? (
+                                    <img
+                                      src={product.images[0]}
+                                      alt={product.name}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                                      No image
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="p-4 align-middle font-medium">{product.name}</td>
+                              <td className="p-4 align-middle text-muted-foreground">{product.sku || '-'}</td>
+                              <td className="p-4 align-middle">{product.price ? `$${product.price}` : '-'}</td>
+                              <td className="p-4 align-middle">
+                                {product.category ? (
+                                  <Badge variant="outline">{product.category}</Badge>
+                                ) : (
+                                  '-'
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between pt-4">
+                  <div className="text-sm text-muted-foreground">
+                    <span className="font-medium">{form.getValues("productIds").length}</span> products selected
+                    {form.getValues("productIds").length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-2 h-7 text-xs"
+                        onClick={() => form.setValue("productIds", [])}
+                      >
+                        Clear All
+                      </Button>
+                    )}
                   </div>
                   
-                  {filteredProducts.length === 0 && (
-                    <div className="text-center p-8 bg-muted rounded-md">
-                      <p>No products found matching your criteria.</p>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex justify-between mt-6">
-                  <Button variant="outline" onClick={() => setActiveTab("templates")}>
-                    Back to Templates
-                  </Button>
-                  <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
-                    Create Catalog
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setActiveTab("templates")}>
+                      Back to Templates
+                    </Button>
+                    <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+                      Create Catalog
+                    </Button>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
