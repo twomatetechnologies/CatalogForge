@@ -94,13 +94,7 @@ export default function CatalogView() {
     try {
       setGeneratingPDF(true);
       
-      if (catalog.pdfUrl) {
-        window.open(catalog.pdfUrl, '_blank');
-        setGeneratingPDF(false);
-        return;
-      }
-      
-      // Generate PDF if not already generated
+      // Generate PDF (or retrieve existing one)
       const response = await fetch(`/api/catalogs/${catalog.id}/pdf`);
       if (!response.ok) throw new Error('Failed to generate PDF');
       
@@ -117,12 +111,17 @@ export default function CatalogView() {
       // Also invalidate the catalog list
       await queryClient.invalidateQueries({ queryKey: ['/api/catalogs'] });
       
-      // Open the PDF in a new tab after a short delay to ensure it's loaded
-      setTimeout(() => {
-        if (data.pdfUrl) {
-          window.open(data.pdfUrl, '_blank');
-        }
-      }, 500);
+      // For the "Download PDF" action, open in a new tab
+      if (data.pdfUrl) {
+        // Create a temporary anchor to handle the download correctly
+        const a = document.createElement('a');
+        a.href = data.pdfUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
     } catch (error) {
       console.error('PDF generation error:', error);
       toast({

@@ -10,6 +10,9 @@ app.use(express.urlencoded({ extended: false }));
 // Serve files from the uploads directory
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
+// Serve files from the public directory
+app.use(express.static(path.join(process.cwd(), 'public')));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
