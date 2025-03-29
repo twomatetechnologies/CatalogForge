@@ -1,8 +1,6 @@
-import { Catalog, Product, BusinessProfile, Template } from '@/types';
 
-// This is a placeholder for PDF generation functionality
-// In a real application, you would use a library like react-pdf
-// to generate actual PDFs
+import { Document, Page, Text, View, StyleSheet, PDFViewer } from '@react-pdf/renderer';
+import { Catalog, Product, BusinessProfile, Template } from '@/types';
 
 export interface PDFGenerationOptions {
   quality: 'high' | 'medium' | 'low';
@@ -12,48 +10,47 @@ export interface PDFGenerationOptions {
   includeTableOfContents: boolean;
 }
 
-const defaultOptions: PDFGenerationOptions = {
-  quality: 'high',
-  includeProductImages: true,
-  includeBusinessLogo: true,
-  includePageNumbers: true,
-  includeTableOfContents: true,
-};
-
-export async function generateCatalogPDF(
-  catalog: Catalog,
-  products: Product[],
-  business: BusinessProfile,
-  template: Template,
-  options: Partial<PDFGenerationOptions> = {}
-): Promise<Blob> {
-  // Merge default options with provided options
-  const mergedOptions = { ...defaultOptions, ...options };
-  
-  try {
-    // In a real implementation, we would use react-pdf or similar to generate a PDF
-    // For this prototype, we'll just simulate generating a PDF by returning a blob
-    
-    // Simulate a delay to mimic PDF generation
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // For prototype purposes, this is a placeholder
-    // In a real application, we would create an actual PDF
-    const metadata = JSON.stringify({
-      catalog,
-      products,
-      business,
-      template,
-      options: mergedOptions,
-      generatedAt: new Date().toISOString(),
-    });
-    
-    return new Blob([metadata], { type: 'application/pdf' });
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw new Error('Failed to generate PDF');
+const styles = StyleSheet.create({
+  page: {
+    flexDirection: 'column',
+    padding: 30
+  },
+  header: {
+    marginBottom: 20,
+    textAlign: 'center'
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 10
+  },
+  product: {
+    marginBottom: 15,
+    padding: 10,
+    border: '1px solid #ccc'
   }
-}
+});
+
+export const CatalogPDFDocument = ({ catalog, products, business }: {
+  catalog: Catalog;
+  products: Product[];
+  business: BusinessProfile;
+}) => (
+  <Document>
+    <Page size="A4" style={styles.page}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{catalog.name}</Text>
+        <Text>{business.name}</Text>
+      </View>
+      {products.map((product, index) => (
+        <View key={index} style={styles.product}>
+          <Text>{product.name}</Text>
+          <Text>${product.price}</Text>
+          <Text>{product.description}</Text>
+        </View>
+      ))}
+    </Page>
+  </Document>
+);
 
 export function downloadPDF(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -64,7 +61,6 @@ export function downloadPDF(blob: Blob, filename: string): void {
   document.body.appendChild(link);
   link.click();
   
-  // Clean up
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
