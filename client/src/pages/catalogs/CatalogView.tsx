@@ -106,25 +106,25 @@ export default function CatalogView() {
       
       const data = await response.json();
       
-      // Update the local catalog data with the new PDF URL
-      queryClient.setQueryData(`/api/catalogs/${catalogId}`, {
-        ...catalog,
-        pdfUrl: data.pdfUrl,
-        status: 'published'
-      });
-      
-      // Invalidate the catalogs list to reflect the status change
-      queryClient.invalidateQueries(['/api/catalogs']);
-      
-      if (data.pdfUrl) {
-        window.open(data.pdfUrl, '_blank');
-      }
-      
       toast({
         title: "Success",
         description: "Catalog PDF has been generated successfully",
       });
+      
+      // Refetch the catalog data to show updated PDF
+      await queryClient.invalidateQueries({ queryKey: [`/api/catalogs/${catalogId}`] });
+      
+      // Also invalidate the catalog list
+      await queryClient.invalidateQueries({ queryKey: ['/api/catalogs'] });
+      
+      // Open the PDF in a new tab after a short delay to ensure it's loaded
+      setTimeout(() => {
+        if (data.pdfUrl) {
+          window.open(data.pdfUrl, '_blank');
+        }
+      }, 500);
     } catch (error) {
+      console.error('PDF generation error:', error);
       toast({
         title: "Error",
         description: "Failed to generate catalog PDF",
