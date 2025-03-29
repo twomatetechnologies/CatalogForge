@@ -141,11 +141,17 @@ export default function CatalogCreate() {
   // Handle product selection
   const toggleProductSelection = (productId: number) => {
     const currentSelection = form.getValues("productIds");
+    let newSelection;
+    
     if (currentSelection.includes(productId)) {
-      form.setValue("productIds", currentSelection.filter(id => id !== productId));
+      newSelection = currentSelection.filter(id => id !== productId);
     } else {
-      form.setValue("productIds", [...currentSelection, productId]);
+      newSelection = [...currentSelection, productId];
     }
+    
+    form.setValue("productIds", newSelection);
+    // Force re-render by updating state
+    form.trigger("productIds");
   };
   
   // Handle back navigation
@@ -171,14 +177,18 @@ export default function CatalogCreate() {
     const currentSelection = form.getValues("productIds");
     const allSelected = categoryProducts.every((p: Product) => currentSelection.includes(p.id));
     
+    let newSelection;
     if (allSelected) {
       // If all are selected, deselect all in this category
-      form.setValue("productIds", currentSelection.filter(id => !categoryProductIds.includes(id)));
+      newSelection = currentSelection.filter(id => !categoryProductIds.includes(id));
     } else {
       // Otherwise, select all in this category
-      const updatedSelection = [...new Set([...currentSelection, ...categoryProductIds])];
-      form.setValue("productIds", updatedSelection);
+      newSelection = [...new Set([...currentSelection, ...categoryProductIds])];
     }
+    
+    form.setValue("productIds", newSelection);
+    // Force re-render
+    form.trigger("productIds");
   };
   
   if (templatesLoading || businessLoading || productsLoading) {
@@ -510,6 +520,8 @@ export default function CatalogCreate() {
                                   const remainingIds = currentSelection.filter(id => !filteredIds.includes(id));
                                   form.setValue("productIds", remainingIds);
                                 }
+                                // Force re-render
+                                form.trigger("productIds");
                               }}
                             />
                           </th>
@@ -547,6 +559,8 @@ export default function CatalogCreate() {
                                       const currentSelection = form.getValues("productIds");
                                       form.setValue("productIds", currentSelection.filter(id => id !== product.id));
                                     }
+                                    // Force re-render
+                                    form.trigger("productIds");
                                   }}
                                 />
                               </td>
@@ -591,7 +605,10 @@ export default function CatalogCreate() {
                         variant="ghost"
                         size="sm"
                         className="ml-2 h-7 text-xs"
-                        onClick={() => form.setValue("productIds", [])}
+                        onClick={() => {
+                          form.setValue("productIds", []);
+                          form.trigger("productIds");
+                        }}
                       >
                         Clear All
                       </Button>
