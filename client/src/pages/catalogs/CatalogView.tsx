@@ -40,17 +40,20 @@ export default function CatalogView() {
     isLoading: catalogLoading,
     isError: catalogError
   } = useQuery({
-    queryKey: ['/api/catalogs', catalogId],
+    queryKey: [`/api/catalogs/${catalogId}`],
     enabled: catalogId > 0
   });
   
   const {
-    data: template,
-    isLoading: templateLoading
+    data: templates = [],
+    isLoading: templatesLoading
   } = useQuery({
-    queryKey: ['/api/templates', catalog?.templateId],
-    enabled: !!catalog?.templateId
+    queryKey: ['/api/templates'],
+    enabled: !!catalog
   });
+  
+  // Get the specific template for this catalog
+  const template = templates.find(t => t.id === catalog?.templateId);
   
   const {
     data: business,
@@ -115,7 +118,7 @@ export default function CatalogView() {
     }
   };
   
-  const isLoading = catalogLoading || templateLoading || businessLoading || productsLoading;
+  const isLoading = catalogLoading || templatesLoading || businessLoading || productsLoading;
   
   if (isLoading) {
     return <div className="p-4">Loading catalog...</div>;
