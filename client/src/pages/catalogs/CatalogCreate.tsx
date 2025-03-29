@@ -423,7 +423,13 @@ export default function CatalogCreate() {
                             <img 
                               src={template.thumbnail} 
                               alt={template.name} 
-                              className="max-h-full"
+                              className="max-h-full max-w-full"
+                              onError={(e) => {
+                                console.log("Image failed to load:", template.thumbnail);
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = "";
+                                e.currentTarget.parentElement.innerHTML = '<div class="text-muted-foreground">Template Image Error</div>';
+                              }}
                             />
                           ) : (
                             <div className="text-muted-foreground">No preview</div>

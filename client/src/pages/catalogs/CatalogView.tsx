@@ -69,8 +69,8 @@ export default function CatalogView() {
   });
   
   // Filter products to only include those in the catalog
-  const catalogProducts = catalog?.productIds 
-    ? products.filter((product: Product) => catalog.productIds.includes(product.id))
+  const catalogProducts = catalog?.productIds && Array.isArray(products)
+    ? products.filter((product: Product) => catalog.productIds?.includes(product.id))
     : [];
 
   // Handle back navigation
@@ -241,7 +241,7 @@ export default function CatalogView() {
                 <div>
                   <p className="text-sm font-medium">Products</p>
                   <p className="text-sm text-muted-foreground">
-                    {catalog.productIds.length} products included
+                    {catalog.productIds ? catalog.productIds.length : 0} products included
                   </p>
                 </div>
               </div>
