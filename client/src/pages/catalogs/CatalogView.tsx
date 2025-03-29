@@ -61,7 +61,7 @@ export default function CatalogView() {
   });
   
   const {
-    data: products = [],
+    data: allProducts = [],
     isLoading: productsLoading
   } = useQuery({
     queryKey: ['/api/products'],
@@ -69,8 +69,8 @@ export default function CatalogView() {
   });
   
   // Filter products to only include those in the catalog
-  const catalogProducts = catalog?.productIds && Array.isArray(products)
-    ? products.filter((product: Product) => catalog.productIds?.includes(product.id))
+  const catalogProducts = catalog?.productIds && Array.isArray(allProducts)
+    ? allProducts.filter((product: Product) => catalog.productIds?.includes(product.id))
     : [];
 
   // Handle back navigation

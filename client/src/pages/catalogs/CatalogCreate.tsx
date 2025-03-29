@@ -699,7 +699,7 @@ export default function CatalogCreate() {
                       Back to Templates
                     </Button>
                     <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
-                      Create Catalog
+                      {isEditing ? "Update Catalog" : "Create Catalog"}
                     </Button>
                   </div>
                 </div>
