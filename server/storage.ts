@@ -241,10 +241,20 @@ export class MemStorage implements IStorage {
     const settings = catalog.settings 
       ? { ...existingCatalog.settings, ...catalog.settings }
       : existingCatalog.settings;
+    
+    // Ensure productIds is properly handled
+    let productIds = existingCatalog.productIds;
+    if (catalog.productIds) {
+      // Convert to array if necessary
+      productIds = Array.isArray(catalog.productIds) 
+        ? catalog.productIds.slice() // create a copy to avoid reference issues
+        : Array.from(catalog.productIds);
+    }
       
     const updatedCatalog = { 
       ...existingCatalog, 
       ...catalog,
+      productIds,
       settings,
       updatedAt: new Date() 
     };
