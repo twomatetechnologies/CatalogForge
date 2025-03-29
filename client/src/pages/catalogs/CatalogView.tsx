@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useParams } from "wouter";
+import { queryClient } from "@/lib/queryClient";
 import { 
   Card, 
   CardContent, 
@@ -86,7 +87,7 @@ export default function CatalogView() {
     navigate(`/catalogs/${catalogId}/edit`);
   };
   
-  // Handle download PDF
+  // Handle download and generation of PDF
   const handleDownloadPDF = async () => {
     if (!catalog) return;
     
@@ -104,13 +105,29 @@ export default function CatalogView() {
       if (!response.ok) throw new Error('Failed to generate PDF');
       
       const data = await response.json();
+      
+      // Update the local catalog data with the new PDF URL
+      queryClient.setQueryData(`/api/catalogs/${catalogId}`, {
+        ...catalog,
+        pdfUrl: data.pdfUrl,
+        status: 'published'
+      });
+      
+      // Invalidate the catalogs list to reflect the status change
+      queryClient.invalidateQueries(['/api/catalogs']);
+      
       if (data.pdfUrl) {
         window.open(data.pdfUrl, '_blank');
       }
+      
+      toast({
+        title: "Success",
+        description: "Catalog PDF has been generated successfully",
+      });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to download catalog PDF",
+        description: "Failed to generate catalog PDF",
         variant: "destructive"
       });
     } finally {
