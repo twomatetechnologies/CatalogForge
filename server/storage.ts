@@ -8,6 +8,8 @@ import {
   Catalog, 
   InsertCatalog 
 } from "@shared/schema";
+import { DEV_MODE, LOAD_SAMPLE_DATA } from '@shared/config';
+import { sampleBusinesses, sampleProducts } from './sampleData';
 
 // Interface for all storage operations
 export interface IStorage {
@@ -63,6 +65,28 @@ export class MemStorage implements IStorage {
 
     // Initialize with some default templates
     this.initializeTemplates();
+
+    // Load sample data if in development mode
+    if (LOAD_SAMPLE_DATA) {
+      this.loadSampleData();
+    }
+  }
+  
+  // Load sample data for development mode
+  private loadSampleData() {
+    console.log("Loading sample data for development mode...");
+    
+    // Add sample businesses
+    sampleBusinesses.forEach(business => {
+      this.createBusiness(business);
+    });
+    
+    // Add sample products
+    sampleProducts.forEach(product => {
+      this.createProduct(product);
+    });
+    
+    console.log(`Sample data loaded: ${sampleBusinesses.length} businesses, ${sampleProducts.length} products`);
   }
 
   // Business methods
