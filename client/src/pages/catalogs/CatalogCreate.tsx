@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation, useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -40,6 +40,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function CatalogCreate() {
   const [, navigate] = useLocation();
+  const params = useParams();
+  const catalogId = params.id ? parseInt(params.id) : undefined;
+  const isEditing = !!catalogId;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,6 +71,15 @@ export default function CatalogCreate() {
     isLoading: productsLoading
   } = useQuery({
     queryKey: ['/api/products']
+  });
+  
+  // Fetch catalog data for editing
+  const {
+    data: catalogData,
+    isLoading: catalogLoading
+  } = useQuery({
+    queryKey: [`/api/catalogs/${catalogId}`],
+    enabled: isEditing,
   });
 
   // Form to create new catalog
@@ -117,6 +129,34 @@ export default function CatalogCreate() {
     }
   });
   
+  // Update catalog mutation
+  const updateCatalog = useMutation({
+    mutationFn: async (values: FormValues) => {
+      return apiRequest('PUT', `/api/catalogs/${catalogId}`, values);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Catalog updated successfully"
+      });
+      
+      // Invalidate catalogs query and the specific catalog query
+      queryClient.invalidateQueries({ queryKey: ['/api/catalogs'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/catalogs/${catalogId}`] });
+      
+      // Redirect to catalogs page
+      navigate('/catalogs');
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update catalog",
+        variant: "destructive"
+      });
+      console.error(error);
+    }
+  });
+  
   // Get all available product categories
   const categories = [...new Set(products.map((p: Product) => p.category).filter(Boolean))];
   
@@ -133,7 +173,11 @@ export default function CatalogCreate() {
   
   // Handle form submission
   const onSubmit = (values: FormValues) => {
-    createCatalog.mutate(values);
+    if (isEditing) {
+      updateCatalog.mutate(values);
+    } else {
+      createCatalog.mutate(values);
+    }
   };
   
   // Handle product selection
@@ -189,7 +233,22 @@ export default function CatalogCreate() {
     form.trigger("productIds");
   };
   
-  if (templatesLoading || businessLoading || productsLoading) {
+  // Initialize form when editing an existing catalog
+  useEffect(() => {
+    if (catalogData && isEditing) {
+      form.reset({
+        name: catalogData.name,
+        description: catalogData.description || "",
+        businessId: catalogData.businessId,
+        templateId: catalogData.templateId,
+        productIds: catalogData.productIds || [],
+        status: catalogData.status,
+        settings: catalogData.settings
+      });
+    }
+  }, [catalogData, isEditing, form]);
+
+  if (templatesLoading || businessLoading || productsLoading || (isEditing && catalogLoading)) {
     return <div className="p-4">Loading...</div>;
   }
   
@@ -201,14 +260,17 @@ export default function CatalogCreate() {
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold">Create Catalog</h1>
+          <h1 className="text-3xl font-bold">{isEditing ? 'Edit Catalog' : 'Create Catalog'}</h1>
         </div>
         <Button 
           type="submit" 
           onClick={form.handleSubmit(onSubmit)}
-          disabled={createCatalog.isPending}
+          disabled={isEditing ? updateCatalog.isPending : createCatalog.isPending}
         >
-          {createCatalog.isPending ? "Creating..." : "Create Catalog"}
+          {isEditing 
+            ? (updateCatalog.isPending ? "Updating..." : "Update Catalog") 
+            : (createCatalog.isPending ? "Creating..." : "Create Catalog")
+          }
         </Button>
       </div>
       
