@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{catalogName}}</title>
+  <style>
+    /* Marketing Team Special Template */
+    body { 
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 30px;
+      color: #333;
+      background-color: #f9f9f9;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .header h1 {
+      color: #2c3e50;
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    
+    .header p {
+      color: #7f8c8d;
+      font-size: 18px;
+    }
+    
+    .company-name {
+      font-weight: bold;
+      font-size: 24px;
+      color: #16a085;
+      margin-bottom: 30px;
+    }
+    
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+    
+    .product-card {
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .product-image {
+      height: 200px;
+      background-color: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .product-image img {
+      max-width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+    }
+    
+    .product-details {
+      padding: 20px;
+    }
+    
+    .product-name {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+    
+    .product-price {
+      font-weight: bold;
+      color: #e74c3c;
+      font-size: 20px;
+      margin: 10px 0;
+    }
+    
+    .product-sku {
+      font-size: 12px;
+      color: #95a5a6;
+      margin-bottom: 10px;
+    }
+    
+    .product-description {
+      font-size: 14px;
+      color: #7f8c8d;
+      line-height: 1.5;
+    }
+    
+    .footer {
+      margin-top: 50px;
+      text-align: center;
+      font-size: 14px;
+      color: #95a5a6;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>{{catalogName}}</h1>
+    <p>{{catalogDescription}}</p>
+    <div class="company-name">{{businessName}}</div>
+  </div>
+  
+  <div class="products-grid">
+    {{products}}
+  </div>
+  
+  <div class="footer">
+    <p>Generated on {{generatedDate}}</p>
+    <p>For inquiries, please contact us</p>
+  </div>
+</body>
+</html>

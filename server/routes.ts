@@ -212,6 +212,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/templates", async (_req, res) => {
     try {
       const templates = await dataStorage.getTemplates();
+      
+      // Check for additional custom templates in the filesystem
+      try {
+        const customTemplatesDir = path.join(process.cwd(), 'public', 'templates', 'custom');
+        const customFiles = fs.readdirSync(customTemplatesDir);
+        
+        // Find HTML template files (excluding product templates and README)
+        const customTemplateFiles = customFiles.filter(file => 
+          file.endsWith('.html') && 
+          !file.includes('-product.html') && 
+          !file.includes('README')
+        );
+        
+        // Check which custom templates aren't already in the database
+        const existingTemplateNames = templates.map(t => t.name.toLowerCase().replace(/\s+/g, '-'));
+        
+        // For each custom template file, check if it's already represented in the templates
+        for (const file of customTemplateFiles) {
+          const templateName = file.replace('.html', '').split('-').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+          ).join(' ');
+          
+          const templateFileName = templateName.toLowerCase().replace(/\s+/g, '-');
+          
+          if (!existingTemplateNames.includes(templateFileName)) {
+            // This is a new custom template - add it to storage
+            const newTemplate = await dataStorage.createTemplate({
+              name: templateName,
+              description: 'Custom template from marketing team',
+              thumbnail: `/templates/custom/${file.replace('.html', '.svg')}`,
+              layout: {
+                type: 'custom',
+                showPrice: true,
+                showSKU: true,
+                showDescription: true,
+                showImage: true,
+                customTemplate: file
+              },
+              isDefault: false
+            });
+            
+            // Add to the list of templates we'll return
+            templates.push(newTemplate);
+            console.log(`Added custom template: ${templateName}`);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking for custom templates:', err);
+        // Continue without custom templates if there's an error
+      }
+      
       res.json(templates);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch templates" });
@@ -600,79 +651,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`HTML path: ${htmlPath}`);
       console.log(`PDF path: ${pdfPath}`);
       
-      // Generate HTML content for catalog
-      let productHtml = '';
-      for (const product of catalogProducts) {
-        let imageHtml = 'No Image';
-        if (product.images && product.images[0]) {
-          imageHtml = `<img src="${product.images[0]}" alt="${product.name}" style="max-width: 100%; max-height: 100%;">`;
-        }
-        
-        let skuHtml = '';
-        if (product.sku) {
-          skuHtml = `<div class="product-sku">SKU: ${product.sku}</div>`;
-        }
-        
-        let priceHtml = '';
-        if (product.price) {
-          priceHtml = `<div class="product-price">$${product.price}</div>`;
-        }
-        
-        let descriptionHtml = '';
-        if (product.description) {
-          descriptionHtml = `<div class="product-description">${product.description}</div>`;
-        }
-        
-        productHtml += `
-          <div class="product">
-            <div class="product-image">
-              ${imageHtml}
-            </div>
-            <div class="product-details">
-              <div class="product-name">${product.name}</div>
-              ${skuHtml}
-              ${priceHtml}
-              ${descriptionHtml}
-            </div>
-          </div>
-        `;
-      }
+      // Import the template renderer
+      const { renderCatalogWithTemplate } = await import('./templateRenderer');
       
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${catalog.name}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .product { border: 1px solid #eee; padding: 15px; margin-bottom: 15px; display: flex; }
-            .product-image { width: 100px; height: 100px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; margin-right: 15px; }
-            .product-details { flex: 1; }
-            .product-name { font-weight: bold; margin-bottom: 5px; }
-            .product-price { color: #e63946; font-weight: bold; }
-            .product-description { color: #666; margin-top: 5px; }
-            .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #999; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>${catalog.name}</h1>
-            <p>${catalog.description || ''}</p>
-            <p>Template: ${template.name}</p>
-          </div>
-          
-          <div class="products">
-            ${productHtml}
-          </div>
-          
-          <div class="footer">
-            <p>Generated on ${new Date().toLocaleString()}</p>
-            <p>${business.name}</p>
-          </div>
-        </body>
-        </html>
-      `;
+      // Generate HTML content using the template renderer
+      const htmlContent = await renderCatalogWithTemplate(
+        catalog,
+        catalogProducts,
+        template,
+        business
+      );
       
       console.log('Writing HTML content to file');
       fs.writeFileSync(htmlPath, htmlContent);

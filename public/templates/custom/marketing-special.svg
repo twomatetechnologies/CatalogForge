@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="140px" viewBox="0 0 200 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Marketing Special Template</title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect stroke="#E0E0E0" stroke-width="2" fill="#FFFFFF" x="1" y="1" width="198" height="138" rx="6"></rect>
+        <rect fill="#F3F4F6" x="15" y="15" width="170" height="30" rx="4"></rect>
+        <rect fill="#16A085" x="20" y="22" width="160" height="16" rx="2"></rect>
+        <g transform="translate(15, 55)">
+            <rect fill="#F5F5F5" x="0" y="0" width="52" height="70" rx="4"></rect>
+            <rect fill="#F5F5F5" x="59" y="0" width="52" height="70" rx="4"></rect>
+            <rect fill="#F5F5F5" x="118" y="0" width="52" height="70" rx="4"></rect>
+            <rect fill="#E74C3C" x="10" y="50" width="32" height="10" rx="2"></rect>
+            <rect fill="#E74C3C" x="69" y="50" width="32" height="10" rx="2"></rect>
+            <rect fill="#E74C3C" x="128" y="50" width="32" height="10" rx="2"></rect>
+            <rect fill="#2C3E50" x="10" y="40" width="32" height="6" rx="1"></rect>
+            <rect fill="#2C3E50" x="69" y="40" width="32" height="6" rx="1"></rect>
+            <rect fill="#2C3E50" x="128" y="40" width="32" height="6" rx="1"></rect>
+        </g>
+        <rect fill="#E0E0E0" x="70" y="130" width="60" height="4" rx="2"></rect>
+    </g>
+</svg>
