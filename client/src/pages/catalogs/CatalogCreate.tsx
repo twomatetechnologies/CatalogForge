@@ -405,7 +405,10 @@ export default function CatalogCreate() {
                           ? "ring-2 ring-primary" 
                           : "hover:bg-accent/10"
                       }`}
-                      onClick={() => form.setValue("templateId", template.id)}
+                      onClick={() => {
+                        form.setValue("templateId", template.id);
+                        form.trigger("templateId");
+                      }}
                     >
                       <CardHeader className="pb-2">
                         <div className="flex justify-between">
@@ -546,7 +549,13 @@ export default function CatalogCreate() {
                               className={`border-b transition-colors hover:bg-muted/50 ${
                                 isProductSelected(product.id) ? "bg-muted/50" : ""
                               }`}
-                              onClick={() => toggleProductSelection(product.id)}
+                              onClick={(e) => {
+                                // Prevent click if clicking on checkbox
+                                if ((e.target as Element).closest('td')?.classList.contains('p-4')) {
+                                  return;
+                                }
+                                toggleProductSelection(product.id);
+                              }}
                             >
                               <td className="p-4 align-middle">
                                 <Checkbox 
