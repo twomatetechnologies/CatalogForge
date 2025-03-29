@@ -682,18 +682,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const htmlUrl = `/generated/${htmlFileName}`;
       
       try {
-        // Import our PDFKit generator
-        const { generateCatalogPDF } = await import('./pdfKitGenerator');
-        
-        // Generate actual PDF using PDFKit
-        console.log('Generating PDF with PDFKit...');
-        await generateCatalogPDF(
-          catalog,
-          catalogProducts,
-          template,
-          business,
-          pdfPath
-        );
+        // First try to generate PDF with PDFKit
+        try {
+          // Import our PDFKit generator
+          const { generateCatalogPDF } = await import('./pdfKitGenerator');
+          
+          // Generate actual PDF using PDFKit
+          console.log('Generating PDF with PDFKit...');
+          await generateCatalogPDF(
+            catalog,
+            catalogProducts,
+            template,
+            business,
+            pdfPath
+          );
+          
+          console.log('PDFKit PDF generation successful');
+        } catch (pdfKitError) {
+          // If PDFKit fails, use Puppeteer as fallback
+          console.error('PDFKit generation failed, falling back to Puppeteer:', pdfKitError);
+          
+          // Generate the HTML content
+          const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>${catalog.name}</title>
+                <style>
+                  body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+                  h1 { text-align: center; margin-bottom: 5px; }
+                  h2 { text-align: center; font-size: 16px; color: #555; margin-bottom: 20px; }
+                  .business { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 30px; }
+                  .divider { border-top: 1px solid #ccc; margin: 20px 0; }
+                  .product { margin-bottom: 30px; }
+                  .product h3 { margin-bottom: 5px; }
+                  .product .sku { font-size: 12px; color: #777; margin-bottom: 5px; }
+                  .product .price { font-weight: bold; margin-bottom: 5px; }
+                  .product .description { font-size: 14px; color: #333; }
+                  .footer { text-align: center; font-size: 12px; color: #777; margin-top: 30px; }
+                  .page-number { text-align: center; font-size: 12px; color: #777; margin-top: 10px; }
+                </style>
+              </head>
+              <body>
+                <h1>${catalog.name}</h1>
+                ${catalog.description ? `<h2>${catalog.description}</h2>` : ''}
+                <div class="business">${business.name}</div>
+                <div class="divider"></div>
+                ${catalogProducts.map(product => `
+                  <div class="product">
+                    <h3>${product.name}</h3>
+                    ${product.sku ? `<div class="sku">SKU: ${product.sku}</div>` : ''}
+                    ${product.price ? `<div class="price">Price: $${product.price}</div>` : ''}
+                    ${product.description ? `<div class="description">${product.description}</div>` : ''}
+                  </div>
+                `).join('')}
+                <div class="footer">Generated on ${new Date().toLocaleString()}</div>
+                ${catalog.settings?.showPageNumbers ? `<div class="page-number">Page 1</div>` : ''}
+              </body>
+            </html>
+          `;
+          
+          // Import the Puppeteer-based PDF generator
+          const { generatePDF } = await import('./pdfGenerator');
+          
+          // Generate a PDF using Puppeteer
+          await generatePDF(
+            htmlContent,
+            pdfPath,
+            {
+              format: catalog.settings?.pageSize || 'A4',
+              orientation: catalog.settings?.orientation || 'portrait'
+            }
+          );
+          
+          console.log('Puppeteer PDF generation successful');
+        }
         
         // Set the PDF URL
         const pdfUrl = `/generated/${pdfFileName}`;
@@ -713,8 +776,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           catalog: updatedCatalog,
           productCount: catalogProducts.length
         });
-      } catch (pdfError) {
-        console.error('Error generating PDF, falling back to HTML:', pdfError);
+      } catch (error) {
+        console.error('Both PDF generation methods failed, using HTML only:', error);
         
         // Update the catalog with HTML URL as fallback
         const updatedCatalog = await dataStorage.updateCatalog(catalog.id, {

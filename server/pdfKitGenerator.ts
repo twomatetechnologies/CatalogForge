@@ -1,6 +1,14 @@
 import fs from 'fs';
 import path from 'path';
-import PDFDocument from 'pdfkit';
+// Try-catch block for PDFKit import to gracefully handle missing dependencies
+let PDFDocument: any;
+try {
+  PDFDocument = require('pdfkit');
+  console.log('PDFKit loaded successfully');
+} catch (error) {
+  console.error('Error loading PDFKit:', error);
+  PDFDocument = null;
+}
 
 /**
  * Generates a PDF file using PDFKit
@@ -27,8 +35,14 @@ export async function generatePDFWithPDFKit(
       keywords?: string;
     };
   } = {},
-  renderFunction: (doc: PDFKit.PDFDocument) => void
+  renderFunction: (doc: any) => void
 ): Promise<string> {
+  // Check if PDFKit is available
+  if (!PDFDocument) {
+    console.error('PDFKit is not available. PDF generation failed.');
+    throw new Error('PDFKit is not available. Please check if the required dependencies are installed.');
+  }
+
   try {
     console.log('Starting PDF generation with PDFKit');
     
