@@ -576,7 +576,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       console.log(`${catalogProducts.length} products included in catalog`);
       
-      // Generate HTML for PDF
+      // First, import our PDF generator
+      const { generatePDF } = await import('./pdfGenerator');
+      
+      // Create paths for the generated files
       const generatedDir = path.join(process.cwd(), 'public', 'generated');
       console.log(`Generated directory path: ${generatedDir}`);
       
@@ -586,10 +589,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fs.mkdirSync(generatedDir, { recursive: true });
       }
       
-      // Create a simple HTML representation of the catalog as PDF
+      // Create file names for both HTML and PDF
       const timestamp = Date.now();
-      const pdfFileName = `catalog_${catalog.id}_${timestamp}.html`;
+      const fileBaseName = `catalog_${catalog.id}_${timestamp}`;
+      const htmlFileName = `${fileBaseName}.html`;
+      const pdfFileName = `${fileBaseName}.pdf`;
+      const htmlPath = path.join(generatedDir, htmlFileName);
       const pdfPath = path.join(generatedDir, pdfFileName);
+      
+      console.log(`HTML path: ${htmlPath}`);
       console.log(`PDF path: ${pdfPath}`);
       
       // Generate HTML content for catalog
@@ -667,26 +675,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `;
       
       console.log('Writing HTML content to file');
-      fs.writeFileSync(pdfPath, htmlContent);
-      console.log('File written successfully');
+      fs.writeFileSync(htmlPath, htmlContent);
+      console.log('HTML file written successfully');
       
-      // Set the PDF URL to the generated file (use the HTML file as PDF for demo)
-      const pdfUrl = `/generated/${pdfFileName}`;
-      console.log(`PDF URL: ${pdfUrl}`);
+      // Set the HTML URL for preview (will be used if PDF generation fails)
+      const htmlUrl = `/generated/${htmlFileName}`;
       
-      // Update the catalog with the PDF URL
-      const updatedCatalog = await dataStorage.updateCatalog(catalog.id, {
-        pdfUrl,
-        status: 'published'
-      });
-      console.log('Catalog updated with PDF URL');
-      
-      res.json({
-        message: "PDF generated successfully",
-        pdfUrl,
-        catalog: updatedCatalog,
-        productCount: catalogProducts.length
-      });
+      try {
+        // Get page orientation from catalog settings
+        const orientation = catalog.settings?.orientation || 'portrait';
+        const pageSize = catalog.settings?.pageSize || 'A4';
+        
+        // Generate actual PDF
+        console.log('Converting HTML to PDF...');
+        await generatePDF(htmlContent, pdfPath, {
+          format: pageSize as any,
+          orientation: orientation,
+          margin: {
+            top: '1cm',
+            right: '1cm',
+            bottom: '1cm',
+            left: '1cm',
+          }
+        });
+        
+        // Set the PDF URL
+        const pdfUrl = `/generated/${pdfFileName}`;
+        console.log(`PDF URL: ${pdfUrl}`);
+        
+        // Update the catalog with both HTML and PDF URLs
+        const updatedCatalog = await dataStorage.updateCatalog(catalog.id, {
+          pdfUrl: pdfUrl,
+          status: 'published'
+        });
+        console.log('Catalog updated with PDF URL');
+        
+        res.json({
+          message: "PDF generated successfully",
+          pdfUrl: pdfUrl,
+          htmlUrl: htmlUrl,
+          catalog: updatedCatalog,
+          productCount: catalogProducts.length
+        });
+      } catch (pdfError) {
+        console.error('Error generating PDF, falling back to HTML:', pdfError);
+        
+        // Update the catalog with HTML URL as fallback
+        const updatedCatalog = await dataStorage.updateCatalog(catalog.id, {
+          pdfUrl: htmlUrl,
+          status: 'published'
+        });
+        
+        // Return the HTML version as fallback
+        res.json({
+          message: "Catalog generated as HTML (PDF generation failed)",
+          pdfUrl: htmlUrl, // Use HTML as fallback
+          htmlUrl: htmlUrl,
+          catalog: updatedCatalog,
+          productCount: catalogProducts.length,
+          error: "PDF generation failed, using HTML version instead"
+        });
+      }
     } catch (error) {
       console.error('PDF generation error:', error);
       res.status(500).json({ message: "Failed to generate PDF" });
