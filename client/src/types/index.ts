@@ -84,50 +84,19 @@ export interface Catalog {
   description?: string;
   status: 'draft' | 'published';
   templateId: number;
-  content: CatalogContent;
+  productIds: number[];
+  settings: CatalogSettings;
+  pdfUrl?: string;
   createdAt: Date | string;
   updatedAt: Date | string;
-}
-
-export interface CatalogContent {
-  pages: CatalogPage[];
-  settings: CatalogSettings;
-}
-
-export interface CatalogPage {
-  id: string;
-  items: CatalogItem[];
-  layout: string;
-}
-
-export interface CatalogItem {
-  id: string;
-  type: 'product' | 'text' | 'image';
-  content: any;
-  position: {
-    x: number;
-    y: number;
-  };
-  size: {
-    width: number;
-    height: number;
-  };
 }
 
 export interface CatalogSettings {
   pageSize: string;
   orientation: 'portrait' | 'landscape';
-  margins: {
-    top: number;
-    bottom: number;
-    left: number;
-    right: number;
-  };
   showHeader: boolean;
   showFooter: boolean;
-  headerContent?: string;
-  footerContent?: string;
-  backgroundColor: string;
+  showPageNumbers: boolean;
 }
 
 // Dashboard stats type

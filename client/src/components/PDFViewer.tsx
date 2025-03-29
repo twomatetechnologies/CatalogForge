@@ -9,7 +9,7 @@ interface CatalogPDFViewerProps {
   business: BusinessProfile;
 }
 
-export function CatalogPDFViewer({ catalog, products, business }: CatalogPDFViewerProps) {
+export function PDFViewer({ catalog, products, business }: CatalogPDFViewerProps) {
   return (
     <PDFViewer style={{ width: '100%', height: '80vh' }}>
       <CatalogPDFDocument 

@@ -63,7 +63,9 @@ export const catalogs = pgTable("catalogs", {
   description: text("description"),
   status: text("status").default("draft"),
   templateId: integer("template_id").notNull(),
-  content: jsonb("content").notNull(),
+  productIds: jsonb("product_ids").$type<number[]>().notNull(),
+  settings: jsonb("settings"),
+  pdfUrl: text("pdf_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

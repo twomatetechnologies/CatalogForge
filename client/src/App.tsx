@@ -16,7 +16,8 @@ import BusinessDetails from "@/pages/business/BusinessDetails";
 import Products from "@/pages/products/Products";
 import ProductForm from "@/pages/products/ProductForm";
 import Catalogs from "@/pages/catalogs/Catalogs";
-import CatalogEditor from "@/pages/catalogs/CatalogEditor";
+import CatalogCreate from "@/pages/catalogs/CatalogCreate";
+import CatalogView from "@/pages/catalogs/CatalogView";
 import Templates from "@/pages/templates/Templates";
 import NotFound from "@/pages/not-found";
 
@@ -49,8 +50,9 @@ function App() {
               <Route path="/products/new" component={ProductForm} />
               <Route path="/products/:id/edit" component={ProductForm} />
               <Route path="/catalogs" component={Catalogs} />
-              <Route path="/catalogs/new" component={CatalogEditor} />
-              <Route path="/catalogs/:id/edit" component={CatalogEditor} />
+              <Route path="/catalogs/create" component={CatalogCreate} />
+              <Route path="/catalogs/:id" component={CatalogView} />
+              <Route path="/catalogs/:id/edit" component={CatalogCreate} />
               <Route path="/templates" component={Templates} />
               <Route component={NotFound} />
             </Switch>

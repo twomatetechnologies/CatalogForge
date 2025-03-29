@@ -206,12 +206,29 @@ export class MemStorage implements IStorage {
   async createCatalog(catalog: InsertCatalog): Promise<Catalog> {
     const id = this.currentCatalogId++;
     const now = new Date();
+    
+    // Ensure productIds is an array
+    const productIds = catalog.productIds || [];
+    
+    // Create default settings if not provided
+    const settings = catalog.settings || {
+      pageSize: 'A4',
+      orientation: 'portrait',
+      showHeader: true,
+      showFooter: true,
+      showPageNumbers: true
+    };
+    
     const newCatalog: Catalog = { 
       ...catalog, 
-      id, 
+      id,
+      productIds,
+      settings,
+      pdfUrl: catalog.pdfUrl || null,
       createdAt: now, 
       updatedAt: now 
     };
+    
     this.catalogs.set(id, newCatalog);
     return newCatalog;
   }
@@ -220,11 +237,18 @@ export class MemStorage implements IStorage {
     const existingCatalog = this.catalogs.get(id);
     if (!existingCatalog) return undefined;
 
+    // Update settings by merging with existing settings
+    const settings = catalog.settings 
+      ? { ...existingCatalog.settings, ...catalog.settings }
+      : existingCatalog.settings;
+      
     const updatedCatalog = { 
       ...existingCatalog, 
-      ...catalog, 
+      ...catalog,
+      settings,
       updatedAt: new Date() 
     };
+    
     this.catalogs.set(id, updatedCatalog);
     return updatedCatalog;
   }
