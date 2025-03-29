@@ -682,22 +682,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const htmlUrl = `/generated/${htmlFileName}`;
       
       try {
-        // Get page orientation from catalog settings
-        const orientation = catalog.settings?.orientation || 'portrait';
-        const pageSize = catalog.settings?.pageSize || 'A4';
+        // Import our PDFKit generator
+        const { generateCatalogPDF } = await import('./pdfKitGenerator');
         
-        // Generate actual PDF
-        console.log('Converting HTML to PDF...');
-        await generatePDF(htmlContent, pdfPath, {
-          format: pageSize as any,
-          orientation: orientation,
-          margin: {
-            top: '1cm',
-            right: '1cm',
-            bottom: '1cm',
-            left: '1cm',
-          }
-        });
+        // Generate actual PDF using PDFKit
+        console.log('Generating PDF with PDFKit...');
+        await generateCatalogPDF(
+          catalog,
+          catalogProducts,
+          template,
+          business,
+          pdfPath
+        );
         
         // Set the PDF URL
         const pdfUrl = `/generated/${pdfFileName}`;
