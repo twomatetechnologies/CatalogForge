@@ -576,100 +576,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
       console.log(`${catalogProducts.length} products included in catalog`);
       
-      try {
-        // In a real implementation we would generate the PDF here and save it
-        // For this prototype, we'll use a sample file
-        // Make sure the /public/generated directory exists
-        const fs = require('fs');
-        const path = require('path');
-        
-        const generatedDir = path.join(process.cwd(), 'public', 'generated');
-        console.log(`Generated directory path: ${generatedDir}`);
-        
-        if (!fs.existsSync(generatedDir)) {
-          console.log('Creating generated directory');
-          fs.mkdirSync(generatedDir, { recursive: true });
+      // Generate HTML for PDF
+      const generatedDir = path.join(process.cwd(), 'public', 'generated');
+      console.log(`Generated directory path: ${generatedDir}`);
+      
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(generatedDir)) {
+        console.log('Creating generated directory');
+        fs.mkdirSync(generatedDir, { recursive: true });
+      }
+      
+      // Create a simple HTML representation of the catalog as PDF
+      const timestamp = Date.now();
+      const pdfFileName = `catalog_${catalog.id}_${timestamp}.html`;
+      const pdfPath = path.join(generatedDir, pdfFileName);
+      console.log(`PDF path: ${pdfPath}`);
+      
+      // Generate HTML content for catalog
+      let productHtml = '';
+      for (const product of catalogProducts) {
+        let imageHtml = 'No Image';
+        if (product.images && product.images[0]) {
+          imageHtml = `<img src="${product.images[0]}" alt="${product.name}" style="max-width: 100%; max-height: 100%;">`;
         }
         
-        // Create a simple HTML representation of the catalog as PDF
-        const pdfFileName = `catalog_${catalog.id}_${Date.now()}.html`;
-        const pdfPath = path.join(generatedDir, pdfFileName);
-        console.log(`PDF path: ${pdfPath}`);
+        let skuHtml = '';
+        if (product.sku) {
+          skuHtml = `<div class="product-sku">SKU: ${product.sku}</div>`;
+        }
         
-        // Generate a simple HTML file as a PDF placeholder
-        const htmlContent = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>${catalog.name}</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              .header { text-align: center; margin-bottom: 30px; }
-              .product { border: 1px solid #eee; padding: 15px; margin-bottom: 15px; display: flex; }
-              .product-image { width: 100px; height: 100px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; margin-right: 15px; }
-              .product-details { flex: 1; }
-              .product-name { font-weight: bold; margin-bottom: 5px; }
-              .product-price { color: #e63946; font-weight: bold; }
-              .product-description { color: #666; margin-top: 5px; }
-              .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #999; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1>${catalog.name}</h1>
-              <p>${catalog.description || ''}</p>
-              <p>Template: ${template.name}</p>
+        let priceHtml = '';
+        if (product.price) {
+          priceHtml = `<div class="product-price">$${product.price}</div>`;
+        }
+        
+        let descriptionHtml = '';
+        if (product.description) {
+          descriptionHtml = `<div class="product-description">${product.description}</div>`;
+        }
+        
+        productHtml += `
+          <div class="product">
+            <div class="product-image">
+              ${imageHtml}
             </div>
-            
-            <div class="products">
-              ${catalogProducts.map(product => `
-                <div class="product">
-                  <div class="product-image">
-                    ${product.images && product.images[0] ? `<img src="${product.images[0]}" alt="${product.name}" style="max-width: 100%; max-height: 100%;">` : 'No Image'}
-                  </div>
-                  <div class="product-details">
-                    <div class="product-name">${product.name}</div>
-                    ${product.sku ? `<div class="product-sku">SKU: ${product.sku}</div>` : ''}
-                    ${product.price ? `<div class="product-price">$${product.price}</div>` : ''}
-                    ${product.description ? `<div class="product-description">${product.description}</div>` : ''}
-                  </div>
-                </div>
-              `).join('')}
+            <div class="product-details">
+              <div class="product-name">${product.name}</div>
+              ${skuHtml}
+              ${priceHtml}
+              ${descriptionHtml}
             </div>
-            
-            <div class="footer">
-              <p>Generated on ${new Date().toLocaleString()}</p>
-              <p>${business.name}</p>
-            </div>
-          </body>
-          </html>
+          </div>
         `;
-        
-        console.log('Writing HTML content to file');
-        fs.writeFileSync(pdfPath, htmlContent);
-        console.log('File written successfully');
-        
-        // Set the PDF URL to the generated file (use the HTML file as PDF for demo)
-        const pdfUrl = `/generated/${pdfFileName}`;
-        console.log(`PDF URL: ${pdfUrl}`);
-        
-        // Update the catalog with the PDF URL
-        const updatedCatalog = await dataStorage.updateCatalog(catalog.id, {
-          pdfUrl,
-          status: 'published'
-        });
-        console.log('Catalog updated with PDF URL');
-        
-        res.json({
-          message: "PDF generated successfully",
-          pdfUrl,
-          catalog: updatedCatalog,
-          productCount: catalogProducts.length
-        });
-      } catch (fsError) {
-        console.error('File system error:', fsError);
-        throw fsError;
       }
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${catalog.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .product { border: 1px solid #eee; padding: 15px; margin-bottom: 15px; display: flex; }
+            .product-image { width: 100px; height: 100px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; margin-right: 15px; }
+            .product-details { flex: 1; }
+            .product-name { font-weight: bold; margin-bottom: 5px; }
+            .product-price { color: #e63946; font-weight: bold; }
+            .product-description { color: #666; margin-top: 5px; }
+            .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #999; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${catalog.name}</h1>
+            <p>${catalog.description || ''}</p>
+            <p>Template: ${template.name}</p>
+          </div>
+          
+          <div class="products">
+            ${productHtml}
+          </div>
+          
+          <div class="footer">
+            <p>Generated on ${new Date().toLocaleString()}</p>
+            <p>${business.name}</p>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      console.log('Writing HTML content to file');
+      fs.writeFileSync(pdfPath, htmlContent);
+      console.log('File written successfully');
+      
+      // Set the PDF URL to the generated file (use the HTML file as PDF for demo)
+      const pdfUrl = `/generated/${pdfFileName}`;
+      console.log(`PDF URL: ${pdfUrl}`);
+      
+      // Update the catalog with the PDF URL
+      const updatedCatalog = await dataStorage.updateCatalog(catalog.id, {
+        pdfUrl,
+        status: 'published'
+      });
+      console.log('Catalog updated with PDF URL');
+      
+      res.json({
+        message: "PDF generated successfully",
+        pdfUrl,
+        catalog: updatedCatalog,
+        productCount: catalogProducts.length
+      });
     } catch (error) {
       console.error('PDF generation error:', error);
       res.status(500).json({ message: "Failed to generate PDF" });

@@ -1,50 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="300" height="200" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="300" height="200" fill="#f1f5f9" rx="8"/>
-  
-  <!-- Row 1 -->
-  <rect x="20" y="20" width="60" height="70" fill="#e2e8f0" rx="4"/>
-  <rect x="90" y="20" width="60" height="70" fill="#e2e8f0" rx="4"/>
-  <rect x="160" y="20" width="60" height="70" fill="#e2e8f0" rx="4"/>
-  <rect x="230" y="20" width="60" height="70" fill="#e2e8f0" rx="4"/>
-  
-  <!-- Row 2 -->
-  <rect x="20" y="100" width="60" height="70" fill="#e2e8f0" rx="4"/>
-  <rect x="90" y="100" width="60" height="70" fill="#e2e8f0" rx="4"/>
-  <rect x="160" y="100" width="60" height="70" fill="#e2e8f0" rx="4"/>
-  <rect x="230" y="100" width="60" height="70" fill="#e2e8f0" rx="4"/>
-  
-  <!-- Product Images -->
-  <rect x="25" y="25" width="50" height="40" fill="#cbd5e1" rx="2"/>
-  <rect x="95" y="25" width="50" height="40" fill="#cbd5e1" rx="2"/>
-  <rect x="165" y="25" width="50" height="40" fill="#cbd5e1" rx="2"/>
-  <rect x="235" y="25" width="50" height="40" fill="#cbd5e1" rx="2"/>
-  
-  <rect x="25" y="105" width="50" height="40" fill="#cbd5e1" rx="2"/>
-  <rect x="95" y="105" width="50" height="40" fill="#cbd5e1" rx="2"/>
-  <rect x="165" y="105" width="50" height="40" fill="#cbd5e1" rx="2"/>
-  <rect x="235" y="105" width="50" height="40" fill="#cbd5e1" rx="2"/>
-  
-  <!-- Product Names -->
-  <rect x="25" y="70" width="40" height="8" fill="#94a3b8" rx="2"/>
-  <rect x="95" y="70" width="40" height="8" fill="#94a3b8" rx="2"/>
-  <rect x="165" y="70" width="40" height="8" fill="#94a3b8" rx="2"/>
-  <rect x="235" y="70" width="40" height="8" fill="#94a3b8" rx="2"/>
-  
-  <rect x="25" y="150" width="40" height="8" fill="#94a3b8" rx="2"/>
-  <rect x="95" y="150" width="40" height="8" fill="#94a3b8" rx="2"/>
-  <rect x="165" y="150" width="40" height="8" fill="#94a3b8" rx="2"/>
-  <rect x="235" y="150" width="40" height="8" fill="#94a3b8" rx="2"/>
-  
-  <!-- Price Tags -->
-  <rect x="25" y="80" width="20" height="6" fill="#94a3b8" rx="2"/>
-  <rect x="95" y="80" width="20" height="6" fill="#94a3b8" rx="2"/>
-  <rect x="165" y="80" width="20" height="6" fill="#94a3b8" rx="2"/>
-  <rect x="235" y="80" width="20" height="6" fill="#94a3b8" rx="2"/>
-  
-  <rect x="25" y="160" width="20" height="6" fill="#94a3b8" rx="2"/>
-  <rect x="95" y="160" width="20" height="6" fill="#94a3b8" rx="2"/>
-  <rect x="165" y="160" width="20" height="6" fill="#94a3b8" rx="2"/>
-  <rect x="235" y="160" width="20" height="6" fill="#94a3b8" rx="2"/>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="10" width="35" height="35" fill="#e0e0e0" />
+  <rect x="55" y="10" width="35" height="35" fill="#e0e0e0" />
+  <rect x="10" y="55" width="35" height="35" fill="#e0e0e0" />
+  <rect x="55" y="55" width="35" height="35" fill="#e0e0e0" />
 </svg>
