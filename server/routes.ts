@@ -10,6 +10,7 @@ import {
   insertTemplateSchema, 
   insertCatalogSchema 
 } from "@shared/schema";
+import { DEFAULT_BUSINESS_ID } from "@shared/config";
 import { z } from "zod";
 
 // Ensure uploads directory exists
@@ -39,6 +40,15 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
   const httpServer = createServer(app);
+  
+  // Health check endpoint for deployment verification
+  app.get("/api/health", (_req, res) => {
+    res.json({ 
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || "1.0.0"
+    });
+  });
 
   // Business Routes
   app.get("/api/businesses", async (_req, res) => {
@@ -567,7 +577,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Import the products
       const importedProducts = [];
       for (const product of validatedProducts) {
-        const importedProduct = await dataStorage.createProduct(product);
+        // Ensure businessId is set
+        const productWithBusinessId = {
+          ...product,
+          businessId: product.businessId || DEFAULT_BUSINESS_ID
+        };
+        const importedProduct = await dataStorage.createProduct(productWithBusinessId);
         importedProducts.push(importedProduct);
       }
 
@@ -725,7 +740,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   </div>
                 `).join('')}
                 <div class="footer">Generated on ${new Date().toLocaleString()}</div>
-                ${catalog.settings?.showPageNumbers ? `<div class="page-number">Page 1</div>` : ''}
+                ${(catalog.settings as any)?.showPageNumbers ? `<div class="page-number">Page 1</div>` : ''}
               </body>
             </html>
           `;
@@ -738,8 +753,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             htmlContent,
             pdfPath,
             {
-              format: catalog.settings?.pageSize || 'A4',
-              orientation: catalog.settings?.orientation || 'portrait'
+              format: (catalog.settings as any)?.pageSize || 'A4',
+              orientation: (catalog.settings as any)?.orientation || 'portrait'
             }
           );
           
