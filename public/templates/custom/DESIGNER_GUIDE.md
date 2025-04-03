@@ -46,6 +46,8 @@ Templates use variables enclosed in double curly braces that will be replaced wh
 - `{{productDescription}}` - The description of the product
 - `{{productPrice}}` - The price of the product (formatted)
 - `{{productSku}}` - The SKU of the product
+- `{{productSize}}` - The size dimensions of the product
+- `{{productPiecesPerBox}}` - The number of pieces per box
 - `{{productImage}}` - The image of the product
 - `{{productCategory}}` - The category of the product
 - `{{productTags}}` - The tags of the product
@@ -92,6 +94,8 @@ Templates use variables enclosed in double curly braces that will be replaced wh
     <div class="product-name">{{productName}}</div>
     {{productSku}}
     {{productPrice}}
+    {{productSize}}
+    {{productPiecesPerBox}}
     {{productDescription}}
   </div>
 </div>

@@ -37,6 +37,8 @@ export interface Product {
   description?: string;
   sku?: string;
   price?: string;
+  size?: string;
+  piecesPerBox?: number;
   images?: string[];
   category?: string;
   tags?: string[];

@@ -46,6 +46,24 @@ export default function ProductCard({ product, compact = false }: ProductCardPro
             </span>
           )}
         </div>
+        
+        {!compact && (
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {product.size && (
+              <div>
+                <span className="block text-xs font-medium text-gray-600">Size</span>
+                <span className="block text-xs text-gray-500">{product.size}</span>
+              </div>
+            )}
+            
+            {product.piecesPerBox !== undefined && (
+              <div>
+                <span className="block text-xs font-medium text-gray-600">Pieces per Box</span>
+                <span className="block text-xs text-gray-500">{product.piecesPerBox}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -93,6 +93,8 @@ export async function renderCatalogWithTemplate(
             .replace(/{{productImage}}/g, imageHtml)
             .replace(/{{productSku}}/g, product.sku ? `<div class="product-sku">SKU: ${product.sku}</div>` : '')
             .replace(/{{productPrice}}/g, product.price ? `<div class="product-price">$${product.price}</div>` : '')
+            .replace(/{{productSize}}/g, product.size ? `<div class="product-size">Size: ${product.size}</div>` : '')
+            .replace(/{{productPiecesPerBox}}/g, product.piecesPerBox ? `<div class="product-pieces-box">Pieces per box: ${product.piecesPerBox}</div>` : '')
             .replace(/{{productDescription}}/g, product.description ? `<div class="product-description">${product.description}</div>` : '');
           
           productsHtml += productHtml;
@@ -112,6 +114,8 @@ export async function renderCatalogWithTemplate(
                 <div class="product-name">${product.name}</div>
                 ${product.sku ? `<div class="product-sku">SKU: ${product.sku}</div>` : ''}
                 ${product.price ? `<div class="product-price">$${product.price}</div>` : ''}
+                ${product.size ? `<div class="product-size">Size: ${product.size}</div>` : ''}
+                ${product.piecesPerBox ? `<div class="product-pieces-box">Pieces per box: ${product.piecesPerBox}</div>` : ''}
                 ${product.description ? `<div class="product-description">${product.description}</div>` : ''}
               </div>
             </div>
@@ -231,6 +235,8 @@ function generateGridLayout(products: Product[], layout: any): string {
           <div class="product-name">${product.name}</div>
           ${layout.showSKU && product.sku ? `<div class="product-sku">SKU: ${product.sku}</div>` : ''}
           ${layout.showPrice && product.price ? `<div class="product-price">$${product.price}</div>` : ''}
+          ${product.size ? `<div class="product-size">Size: ${product.size}</div>` : ''}
+          ${product.piecesPerBox ? `<div class="product-pieces-box">Pieces per box: ${product.piecesPerBox}</div>` : ''}
           ${layout.showDescription && product.description ? `<div class="product-description">${product.description}</div>` : ''}
         </div>
       </div>
@@ -263,6 +269,8 @@ function generateFeaturedLayout(products: Product[], layout: any): string {
         <div class="product-details" style="flex: 2; padding: 20px;">
           <h2 class="product-name">${product.name}</h2>
           ${layout.showPrice && product.price ? `<div class="product-price" style="font-size: 24px; color: #e63946; margin: 10px 0;">$${product.price}</div>` : ''}
+          ${product.size ? `<div class="product-size" style="font-size: 16px; color: #555; margin: 5px 0;">Size: ${product.size}</div>` : ''}
+          ${product.piecesPerBox ? `<div class="product-pieces-box" style="font-size: 16px; color: #555; margin: 5px 0;">Pieces per box: ${product.piecesPerBox}</div>` : ''}
           ${layout.showDescription && product.description ? `<div class="product-description" style="margin: 15px 0; line-height: 1.6;">${product.description}</div>` : ''}
           ${layout.showFeatures && product.description ? `
             <div class="product-features">
@@ -300,6 +308,8 @@ function generateListLayout(products: Product[], layout: any): string {
         <div class="product-info" style="flex: 1;">
           <div class="product-name" style="font-weight: bold; ${compact ? 'font-size: 14px;' : ''}">${product.name}</div>
           ${layout.showSKU && product.sku ? `<div class="product-sku" style="font-size: 12px; color: #777;">${product.sku}</div>` : ''}
+          ${product.size ? `<div class="product-size" style="font-size: 12px; color: #777;">Size: ${product.size}</div>` : ''}
+          ${product.piecesPerBox ? `<div class="product-pieces-box" style="font-size: 12px; color: #777;">Pieces per box: ${product.piecesPerBox}</div>` : ''}
           ${layout.showDescription && product.description && !compact ? `<div class="product-description" style="margin-top: 5px; font-size: 14px; color: #555;">${product.description}</div>` : ''}
         </div>
         ${layout.showPrice && product.price ? `<div class="product-price" style="font-weight: bold; color: #e63946; ${compact ? 'font-size: 14px;' : 'font-size: 18px;'} min-width: 80px; text-align: right;">$${product.price}</div>` : ''}
@@ -357,9 +367,11 @@ function generateShowcaseLayout(products: Product[], layout: any): string {
             </div>
           ` : ''}
           ${bulletPoints}
-          <div class="product-meta" style="display: flex; justify-content: space-between; margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
-            ${product.sku ? `<div class="product-sku" style="color: #666;">SKU: ${product.sku}</div>` : ''}
-            ${product.price ? `<div class="product-price" style="font-weight: bold; color: #e63946; font-size: 20px;">$${product.price}</div>` : ''}
+          <div class="product-meta" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 30px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+            ${product.sku ? `<div class="product-sku" style="color: #666; flex: 1;">SKU: ${product.sku}</div>` : ''}
+            ${product.size ? `<div class="product-size" style="color: #666; flex: 1;">Size: ${product.size}</div>` : ''}
+            ${product.piecesPerBox ? `<div class="product-pieces-box" style="color: #666; flex: 1;">Pieces per box: ${product.piecesPerBox}</div>` : ''}
+            ${product.price ? `<div class="product-price" style="font-weight: bold; color: #e63946; font-size: 20px; min-width: 120px; text-align: right;">$${product.price}</div>` : ''}
           </div>
         </div>
       </div>
@@ -386,6 +398,8 @@ function getLayoutStyles(layout: {
         .product-name { font-weight: bold; margin-bottom: 5px; }
         .product-price { color: #e63946; font-weight: bold; margin: 5px 0; }
         .product-sku { font-size: 12px; color: #999; margin-bottom: 5px; }
+        .product-size { font-size: 12px; color: #999; margin-bottom: 5px; }
+        .product-pieces-box { font-size: 12px; color: #999; margin-bottom: 5px; }
         .product-description { font-size: 14px; color: #666; margin-top: 10px; }
       `;
     case 'featured':
@@ -458,6 +472,8 @@ async function renderCustomTemplate(
           .replace(/{{productImage}}/g, imageHtml)
           .replace(/{{productSku}}/g, product.sku ? `<div class="product-sku">SKU: ${product.sku}</div>` : '')
           .replace(/{{productPrice}}/g, product.price ? `<div class="product-price">$${product.price}</div>` : '')
+          .replace(/{{productSize}}/g, product.size ? `<div class="product-size">Size: ${product.size}</div>` : '')
+          .replace(/{{productPiecesPerBox}}/g, product.piecesPerBox ? `<div class="product-pieces-box">Pieces per box: ${product.piecesPerBox}</div>` : '')
           .replace(/{{productDescription}}/g, product.description ? `<div class="product-description">${product.description}</div>` : '');
         
         productsHtml += productHtml;
@@ -477,6 +493,8 @@ async function renderCustomTemplate(
               <div class="product-name">${product.name}</div>
               ${product.sku ? `<div class="product-sku">SKU: ${product.sku}</div>` : ''}
               ${product.price ? `<div class="product-price">$${product.price}</div>` : ''}
+              ${product.size ? `<div class="product-size">Size: ${product.size}</div>` : ''}
+              ${product.piecesPerBox ? `<div class="product-pieces-box">Pieces per box: ${product.piecesPerBox}</div>` : ''}
               ${product.description ? `<div class="product-description">${product.description}</div>` : ''}
             </div>
           </div>
@@ -519,6 +537,8 @@ function generateFallbackTemplate(
           <div style="font-weight: bold;">${product.name}</div>
           ${product.sku ? `<div style="font-size: 12px; color: #777;">SKU: ${product.sku}</div>` : ''}
           ${product.price ? `<div style="color: #e63946; font-weight: bold;">$${product.price}</div>` : ''}
+          ${product.size ? `<div style="font-size: 12px; color: #777;">Size: ${product.size}</div>` : ''}
+          ${product.piecesPerBox ? `<div style="font-size: 12px; color: #777;">Pieces per box: ${product.piecesPerBox}</div>` : ''}
           ${product.description ? `<div style="color: #666; margin-top: 5px; font-size: 14px;">${product.description}</div>` : ''}
         </div>
         <div style="clear: both;"></div>

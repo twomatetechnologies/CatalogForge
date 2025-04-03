@@ -26,6 +26,8 @@ export const products = pgTable("products", {
   description: text("description"),
   sku: text("sku"),
   price: text("price"),
+  size: text("size"),
+  piecesPerBox: integer("pieces_per_box"),
   images: jsonb("images").$type<string[]>(),
   category: text("category"),
   tags: jsonb("tags").$type<string[]>(),
