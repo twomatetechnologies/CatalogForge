@@ -1,0 +1,77 @@
+[
+  {
+    "name": "Premium Widget",
+    "description": "High-quality premium widget with advanced features",
+    "sku": "W-PREMIUM-001",
+    "price": "99.99",
+    "size": "12 x 8 x 4 inches",
+    "piecesPerBox": 5,
+    "category": "Widgets",
+    "tags": ["premium", "featured", "bestseller"],
+    "images": ["https://images.unsplash.com/photo-1523275335684-37898b6baf30"],
+    "variations": [
+      {
+        "name": "Color",
+        "options": ["Red", "Blue", "Green"]
+      },
+      {
+        "name": "Size",
+        "options": ["Small", "Medium", "Large"]
+      }
+    ],
+    "active": true
+  },
+  {
+    "name": "Basic Gadget",
+    "description": "Affordable basic gadget for everyday use",
+    "sku": "G-BASIC-002",
+    "price": "49.99",
+    "size": "6 x 4 x 2 inches",
+    "piecesPerBox": 10,
+    "category": "Gadgets",
+    "tags": ["basic", "affordable", "popular"],
+    "images": ["https://images.unsplash.com/photo-1546868871-7041f2a55e12"],
+    "variations": [
+      {
+        "name": "Color",
+        "options": ["Black", "White", "Silver"]
+      }
+    ],
+    "active": true
+  },
+  {
+    "name": "Deluxe Accessory",
+    "description": "Deluxe accessory with premium materials",
+    "sku": "A-DELUXE-003",
+    "price": "79.99",
+    "size": "3 x 3 x 1 inches",
+    "piecesPerBox": 20,
+    "category": "Accessories",
+    "tags": ["deluxe", "premium", "gift"],
+    "images": ["https://images.unsplash.com/photo-1560343090-f0409e92791a"],
+    "active": true
+  },
+  {
+    "name": "Economy Tool",
+    "description": "Budget-friendly tool for simple tasks",
+    "sku": "T-ECON-004",
+    "price": "29.99",
+    "size": "10 x 5 x 3 inches",
+    "piecesPerBox": 15,
+    "category": "Tools",
+    "tags": ["economy", "basic", "budget"],
+    "active": true
+  },
+  {
+    "name": "Luxury Item",
+    "description": "Premium luxury item with exclusive features",
+    "sku": "L-LUX-005",
+    "price": "199.99",
+    "size": "8 x 6 x 4 inches",
+    "piecesPerBox": 2,
+    "category": "Luxury",
+    "tags": ["luxury", "exclusive", "premium"],
+    "images": ["https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d"],
+    "active": true
+  }
+]

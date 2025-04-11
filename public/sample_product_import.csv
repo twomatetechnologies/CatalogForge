@@ -1,0 +1,6 @@
+name,description,sku,price,size,piecesPerBox,category,tags,active
+Premium Widget,High-quality premium widget with advanced features,W-PREMIUM-001,99.99,12 x 8 x 4 inches,5,Widgets,premium;featured;bestseller,true
+Basic Gadget,Affordable basic gadget for everyday use,G-BASIC-002,49.99,6 x 4 x 2 inches,10,Gadgets,basic;affordable;popular,true
+Deluxe Accessory,Deluxe accessory with premium materials,A-DELUXE-003,79.99,3 x 3 x 1 inches,20,Accessories,deluxe;premium;gift,true
+Economy Tool,Budget-friendly tool for simple tasks,T-ECON-004,29.99,10 x 5 x 3 inches,15,Tools,economy;basic;budget,true
+Luxury Item,Premium luxury item with exclusive features,L-LUX-005,199.99,8 x 6 x 4 inches,2,Luxury,luxury;exclusive;premium,true
