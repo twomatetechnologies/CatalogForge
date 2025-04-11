@@ -825,5 +825,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sample data endpoints for product import
+  app.get('/api/samples/import/csv', (req, res) => {
+    const filePath = path.join(process.cwd(), 'public', 'sample_product_import.csv');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=sample_product_import.csv');
+    res.sendFile(filePath);
+  });
+
+  app.get('/api/samples/import/json', (req, res) => {
+    const filePath = path.join(process.cwd(), 'public', 'sample_product_import.json');
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename=sample_product_import.json');
+    res.sendFile(filePath);
+  });
+
   return httpServer;
 }
