@@ -431,7 +431,8 @@ export default function Products() {
           <DialogHeader>
             <DialogTitle>Import Products</DialogTitle>
             <DialogDescription>
-              Upload a CSV or JSON file to import products
+              Upload a CSV or JSON file to import products. 
+              Download our <a href="/api/samples/import/csv" className="text-primary underline" download>sample CSV</a> or <a href="/api/samples/import/json" className="text-primary underline" download>sample JSON</a> to see the expected format.
             </DialogDescription>
           </DialogHeader>
           
@@ -496,7 +497,7 @@ export default function Products() {
               </h4>
               <p className="text-xs text-blue-700">
                 Your file should include columns for: name (required), description, sku, price, 
-                category, and active status
+                size, piecesPerBox, category, tags, and active status
               </p>
             </div>
           </div>

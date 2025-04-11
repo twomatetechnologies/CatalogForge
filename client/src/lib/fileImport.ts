@@ -29,6 +29,8 @@ export async function importProductsFromCSV(
     const descriptionIndex = header.indexOf('description');
     const skuIndex = header.indexOf('sku');
     const priceIndex = header.indexOf('price');
+    const sizeIndex = header.indexOf('size');
+    const piecesPerBoxIndex = header.indexOf('piecesperbox');
     const categoryIndex = header.indexOf('category');
     const tagsIndex = header.indexOf('tags');
     const activeIndex = header.indexOf('active');
@@ -66,6 +68,10 @@ export async function importProductsFromCSV(
         if (descriptionIndex >= 0) product.description = row[descriptionIndex];
         if (skuIndex >= 0) product.sku = row[skuIndex];
         if (priceIndex >= 0) product.price = row[priceIndex];
+        if (sizeIndex >= 0) product.size = row[sizeIndex];
+        if (piecesPerBoxIndex >= 0 && row[piecesPerBoxIndex]) {
+          product.piecesPerBox = parseInt(row[piecesPerBoxIndex], 10);
+        }
         if (categoryIndex >= 0) product.category = row[categoryIndex];
         
         // Process tags - comma-separated string of tags
