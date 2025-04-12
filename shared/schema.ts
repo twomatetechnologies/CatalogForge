@@ -2,6 +2,29 @@ import { pgTable, text, serial, integer, boolean, jsonb, timestamp } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User Schema
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  password: text("password").notNull(),
+  role: text("role").default("user"),
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
+  lastLogin: timestamp("last_login"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  resetToken: true,
+  resetTokenExpiry: true,
+  lastLogin: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Business Profile Schema
 export const businesses = pgTable("businesses", {
   id: serial("id").primaryKey(),
@@ -28,6 +51,9 @@ export const products = pgTable("products", {
   price: text("price"),
   size: text("size"),
   piecesPerBox: integer("pieces_per_box"),
+  barcode: text("barcode"),
+  stock: integer("stock"),
+  stockDate: timestamp("stock_date"),
   images: jsonb("images").$type<string[]>(),
   category: text("category"),
   tags: jsonb("tags").$type<string[]>(),
@@ -79,6 +105,9 @@ export const insertCatalogSchema = createInsertSchema(catalogs).omit({
 });
 
 // Export types
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
 export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
 export type Business = typeof businesses.$inferSelect;
 

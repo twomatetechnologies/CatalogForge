@@ -13,6 +13,16 @@ import { sampleBusinesses, sampleProducts } from './sampleData';
 
 // Interface for all storage operations
 export interface IStorage {
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUsers(): Promise<User[]>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  updateUserPassword(id: number, password: string): Promise<boolean>;
+  updateUserResetToken(email: string, token: string, expiry: Date): Promise<boolean>;
+  deleteUser(id: number): Promise<boolean>;
+
   // Business operations
   getBusiness(id: number): Promise<Business | undefined>;
   getBusinesses(): Promise<Business[]>;
@@ -44,20 +54,24 @@ export interface IStorage {
 
 // In-memory storage implementation
 export class MemStorage implements IStorage {
+  private users: Map<number, User>;
   private businesses: Map<number, Business>;
   private products: Map<number, Product>;
   private templates: Map<number, Template>;
   private catalogs: Map<number, Catalog>;
+  private currentUserId: number;
   private currentBusinessId: number;
   private currentProductId: number;
   private currentTemplateId: number;
   private currentCatalogId: number;
 
   constructor() {
+    this.users = new Map();
     this.businesses = new Map();
     this.products = new Map();
     this.templates = new Map();
     this.catalogs = new Map();
+    this.currentUserId = 1;
     this.currentBusinessId = 1;
     this.currentProductId = 1;
     this.currentTemplateId = 1;
