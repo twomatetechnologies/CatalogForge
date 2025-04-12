@@ -205,6 +205,53 @@ export default function ProductForm() {
       currentImages.filter((url) => url !== urlToRemove)
     );
   };
+  
+  // Handle file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      setUploadLoading(true);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      const result = await response.json();
+      const imageUrl = result.url;
+      
+      // Add the uploaded image URL to the form
+      const currentImages = form.getValues("images") || [];
+      form.setValue("images", [...currentImages, imageUrl]);
+      
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
+      toast({
+        title: "Image uploaded",
+        description: "Image has been uploaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload image",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadLoading(false);
+    }
+  };
 
   // Loading state
   if (isEditing && isFetchingProduct) {
@@ -364,6 +411,71 @@ export default function ProductForm() {
                         )}
                       />
                     </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="barcode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Barcode</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter product barcode" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="stock"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Stock Quantity</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="100" 
+                                value={field.value === undefined ? '' : field.value}
+                                onChange={(e) => {
+                                  const value = e.target.value === '' 
+                                    ? undefined 
+                                    : parseInt(e.target.value, 10);
+                                  field.onChange(value);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="stockDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Stock Date</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="date" 
+                              value={field.value instanceof Date 
+                                ? field.value.toISOString().split('T')[0] 
+                                : field.value || ''}
+                              onChange={(e) => {
+                                const value = e.target.value 
+                                  ? new Date(e.target.value) 
+                                  : undefined;
+                                field.onChange(value);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}
@@ -439,7 +551,27 @@ export default function ProductForm() {
                           disabled={!newImageUrl}
                         >
                           <UploadIcon className="h-4 w-4 mr-2" />
-                          Add
+                          Add URL
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={fileInputRef}
+                          className="hidden"
+                          onChange={handleFileUpload}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadLoading}
+                        >
+                          <UploadIcon className="h-4 w-4 mr-2" />
+                          {uploadLoading ? "Uploading..." : "Upload Image File"}
                         </Button>
                       </div>
                       <div className="mt-3">
