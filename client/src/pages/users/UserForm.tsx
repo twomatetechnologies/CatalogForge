@@ -60,7 +60,7 @@ export default function UserForm() {
   const { id } = useParams();
   const isEditMode = Boolean(id);
   const userId = isEditMode ? parseInt(id) : null;
-  const navigate = useNavigate();
+  const [_, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);

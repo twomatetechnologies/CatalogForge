@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,6 +59,8 @@ export default function ProductForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch businesses
   const { data: businesses = [] } = useQuery<BusinessProfile[]>({
