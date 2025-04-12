@@ -39,6 +39,8 @@ const formSchema = insertProductSchema
     name: z.string().min(1, "Product name is required"),
     businessId: z.number(),
     price: z.string().optional().or(z.literal("")),
+    size: z.string().optional().or(z.literal("")),
+    piecesPerBox: z.number().optional().or(z.literal(undefined)),
     tags: z.array(z.string()).optional().default([]),
   })
   .omit({ images: true })
@@ -77,6 +79,8 @@ export default function ProductForm() {
       description: "",
       sku: "",
       price: "",
+      size: "",
+      piecesPerBox: undefined,
       businessId: businesses[0]?.id || 0,
       category: "",
       tags: [],
@@ -312,6 +316,46 @@ export default function ProductForm() {
                             <FormLabel>Price</FormLabel>
                             <FormControl>
                               <Input placeholder="99.99" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="size"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Size</FormLabel>
+                            <FormControl>
+                              <Input placeholder="12 x 8 x 4 inches" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="piecesPerBox"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Pieces Per Box</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                placeholder="5" 
+                                value={field.value === undefined ? '' : field.value}
+                                onChange={(e) => {
+                                  const value = e.target.value === '' 
+                                    ? undefined 
+                                    : parseInt(e.target.value, 10);
+                                  field.onChange(value);
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
