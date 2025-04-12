@@ -52,13 +52,42 @@ export default function Login() {
     setIsLoading(true);
     console.log('Login attempt with:', data);
     try {
-      const user = await login(data.email, data.password);
+      console.log('Calling login function...');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
+      }
+      
+      if (!result.user || !result.token) {
+        throw new Error('Invalid response from server');
+      }
+
+      // Store the token
+      localStorage.setItem('token', result.token);
+      
+      // Login with the user data
+      await login(result.user);
+      
       console.log('Login successful, user:', user);
-      window.location.href = '/';
+      toast({
+        title: 'Success',
+        description: 'You have successfully logged in',
+        variant: 'default',
+      });
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Login failed',
+        description: error.message || 'Invalid email or password',
         variant: 'destructive',
       });
     } finally {
@@ -117,7 +146,7 @@ export default function Login() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Logging in...' : 'Login'}
               </Button>
-
+              
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <Button 
                   type="button" 
