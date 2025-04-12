@@ -1,8 +1,14 @@
-// User type for authentication (simplified for this prototype)
+// User type for authentication 
 export interface User {
   id: number;
   name: string;
   email: string;
+  role: string;
+  resetToken?: string | null;
+  resetTokenExpiry?: Date | string | null;
+  lastLogin?: Date | string | null;
+  createdAt?: Date | string | null;
+  updatedAt?: Date | string | null;
 }
 
 // Business profile-related types
@@ -39,6 +45,11 @@ export interface Product {
   price?: string;
   size?: string;
   piecesPerBox?: number;
+  // New fields
+  barcode?: string;
+  stock?: number;
+  stockDate?: Date | string;
+  // Original fields
   images?: string[];
   category?: string;
   tags?: string[];

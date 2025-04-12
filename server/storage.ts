@@ -128,9 +128,13 @@ export class MemStorage implements IStorage {
     const id = this.currentUserId++;
     const now = new Date();
     
+    // Set default role if not provided
+    const role = user.role || 'user';
+    
     const newUser: User = {
       ...user,
       id,
+      role,
       resetToken: null,
       resetTokenExpiry: null,
       lastLogin: null,

@@ -11,7 +11,8 @@ import {
   insertCatalogSchema,
   insertUserSchema
 } from "@shared/schema";
-import { isAuthenticated, isAdmin } from "./auth";
+import { isAuthenticated, isAdmin, generateToken, generateResetToken } from "./auth";
+import bcrypt from 'bcryptjs';
 import { DEFAULT_BUSINESS_ID } from "@shared/config";
 import { z } from "zod";
 
@@ -840,6 +841,368 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', 'attachment; filename=sample_product_import.json');
     res.sendFile(filePath);
+  });
+
+  // User management routes (requires admin role)
+  app.get('/api/users', isAuthenticated, isAdmin, async (_req, res) => {
+    try {
+      const users = await dataStorage.getUsers();
+      
+      // Don't return password hashes
+      const safeUsers = users.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      
+      res.json(safeUsers);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch users' });
+    }
+  });
+
+  app.get('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await dataStorage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Don't return password hash
+      const { password, ...userWithoutPassword } = user;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch user' });
+    }
+  });
+
+  app.post('/api/users', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validation = insertUserSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({
+          message: 'Invalid user data',
+          errors: validation.error.format()
+        });
+      }
+      
+      // Check if email already exists
+      const existingUser = await dataStorage.getUserByEmail(validation.data.email);
+      if (existingUser) {
+        return res.status(400).json({ message: 'User with this email already exists' });
+      }
+      
+      // Hash the password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(validation.data.password, salt);
+      
+      // Create user with hashed password
+      const newUser = await dataStorage.createUser({
+        ...validation.data,
+        password: hashedPassword
+      });
+      
+      // Don't return password hash
+      const { password, ...userWithoutPassword } = newUser;
+      
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to create user' });
+    }
+  });
+
+  app.put('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validation = insertUserSchema.partial().safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({
+          message: 'Invalid user data',
+          errors: validation.error.format()
+        });
+      }
+      
+      const userData = { ...validation.data };
+      
+      // If password is being updated, hash it
+      if (userData.password) {
+        const salt = await bcrypt.genSalt(10);
+        userData.password = await bcrypt.hash(userData.password, salt);
+      }
+      
+      const updatedUser = await dataStorage.updateUser(id, userData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Don't return password hash
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update user' });
+    }
+  });
+
+  app.delete('/api/users/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Prevent deleting the last admin user
+      const users = await dataStorage.getUsers();
+      const adminUsers = users.filter(user => user.role === 'admin');
+      
+      const userToDelete = await dataStorage.getUser(id);
+      
+      if (!userToDelete) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      if (userToDelete.role === 'admin' && adminUsers.length <= 1) {
+        return res.status(400).json({
+          message: 'Cannot delete the last admin user'
+        });
+      }
+      
+      const deleted = await dataStorage.deleteUser(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to delete user' });
+    }
+  });
+
+  // Get label settings (for admin label customization)
+  app.get('/api/settings/labels', async (_req, res) => {
+    try {
+      // In a real app, this would fetch from a database
+      // For demo, we'll return default labels
+      res.json({
+        product: {
+          name: "Product Name",
+          sku: "SKU",
+          price: "Price",
+          description: "Description",
+          size: "Size",
+          piecesPerBox: "Pieces Per Box",
+          stock: "Stock",
+          stockDate: "Stock Date",
+          barcode: "Barcode",
+          category: "Category",
+          tags: "Tags",
+          variations: "Variations",
+          active: "Active"
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch label settings' });
+    }
+  });
+
+  // Update label settings (admin only)
+  app.put('/api/settings/labels', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      // In a real app, this would save to a database
+      // For demo, we'll just return success
+      res.json({ 
+        message: 'Label settings updated successfully',
+        settings: req.body
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update label settings' });
+    }
+  });
+
+  // Authentication Routes
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+      }
+      
+      // Find user by email
+      const user = await dataStorage.getUserByEmail(email);
+      
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      
+      // Compare password
+      const isMatch = await bcrypt.compare(password, user.password);
+      
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      
+      // Update last login
+      await dataStorage.updateUser(user.id, { 
+        lastLogin: new Date() 
+      });
+      
+      // Generate JWT token
+      const token = generateToken(user);
+      
+      // Don't return password hash
+      const { password: userPassword, ...userWithoutPassword } = user;
+      
+      res.json({ 
+        user: userWithoutPassword, 
+        token 
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Login failed' });
+    }
+  });
+
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const validation = insertUserSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: 'Invalid user data', 
+          errors: validation.error.format() 
+        });
+      }
+      
+      // Check if email already exists
+      const existingUser = await dataStorage.getUserByEmail(validation.data.email);
+      if (existingUser) {
+        return res.status(400).json({ message: 'User with this email already exists' });
+      }
+      
+      // Hash the password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(validation.data.password, salt);
+      
+      // Create user with hashed password
+      const newUser = await dataStorage.createUser({
+        ...validation.data,
+        password: hashedPassword,
+        role: validation.data.role || 'user' // Default role is 'user'
+      });
+      
+      // Don't return password hash
+      const { password, ...userWithoutPassword } = newUser;
+      
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: 'Registration failed' });
+    }
+  });
+
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+      
+      // Check if user exists
+      const user = await dataStorage.getUserByEmail(email);
+      
+      // Always return success even if user doesn't exist (security)
+      if (!user) {
+        return res.status(200).json({ 
+          message: 'If an account with that email exists, a password reset link has been sent' 
+        });
+      }
+      
+      // Generate reset token
+      const resetToken = generateResetToken();
+      const tokenExpiry = new Date();
+      tokenExpiry.setHours(tokenExpiry.getHours() + 1); // Token expires in 1 hour
+      
+      // Update user with reset token
+      await dataStorage.updateUserResetToken(email, resetToken, tokenExpiry);
+      
+      // In a real app, send an email with the reset link
+      // For this demo, just return the token
+      res.json({ 
+        message: 'Password reset email sent',
+        // Only for demo purposes - in production this would be sent via email
+        resetLink: `/reset-password/${resetToken}`
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process forgot password request' });
+    }
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: 'Token and password are required' });
+      }
+      
+      // Find user by reset token
+      const users = await dataStorage.getUsers();
+      const user = users.find(u => u.resetToken === token);
+      
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired token' });
+      }
+      
+      // Check if token is expired
+      if (user.resetTokenExpiry && new Date(user.resetTokenExpiry) < new Date()) {
+        return res.status(400).json({ message: 'Token has expired' });
+      }
+      
+      // Hash the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      
+      // Update user with new password and clear reset token
+      await dataStorage.updateUser(user.id, {
+        password: hashedPassword,
+      });
+      
+      // Clear reset token
+      await dataStorage.updateUserResetToken(user.email, null, null);
+      
+      res.json({ message: 'Password has been reset successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to reset password' });
+    }
+  });
+
+  app.get('/api/auth/me', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user) {
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
+      
+      // Don't return password hash
+      const { password, ...userWithoutPassword } = user;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to get user data' });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    try {
+      // In a real app with sessions, would clear session
+      res.json({ message: 'Logged out successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to logout' });
+    }
   });
 
   return httpServer;
