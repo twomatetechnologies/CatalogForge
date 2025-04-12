@@ -119,10 +119,52 @@ export default function Login() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Logging in...' : 'Login'}
               </Button>
+              
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full" 
+                  disabled={isLoading}
+                  onClick={() => {
+                    form.setValue('email', 'admin@example.com');
+                    form.setValue('password', 'admin123');
+                  }}
+                >
+                  Login as Admin
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full" 
+                  disabled={isLoading}
+                  onClick={() => {
+                    form.setValue('email', 'user@example.com');
+                    form.setValue('password', 'user123');
+                  }}
+                >
+                  Login as User
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
+          <div className="mb-4 p-3 border rounded-md bg-gray-50">
+            <h3 className="font-medium mb-2 text-sm">Sample Login Credentials:</h3>
+            <div className="space-y-3 text-xs">
+              <div className="border-b pb-2">
+                <div className="font-semibold">Admin User</div>
+                <div>Email: admin@example.com</div>
+                <div>Password: admin123</div>
+              </div>
+              <div>
+                <div className="font-semibold">Regular User</div>
+                <div>Email: user@example.com</div>
+                <div>Password: user123</div>
+              </div>
+            </div>
+          </div>
           <div className="text-sm text-center text-gray-500">
             <Link href="/forgot-password" className="text-primary hover:underline">
               Forgot your password?
