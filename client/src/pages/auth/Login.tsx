@@ -50,14 +50,18 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
+    console.log('Login attempt with:', data);
     try {
-      await login(data.email, data.password);
+      console.log('Calling login function...');
+      const user = await login(data.email, data.password);
+      console.log('Login successful, user:', user);
       toast({
         title: 'Success',
         description: 'You have successfully logged in',
         variant: 'default',
       });
     } catch (error: any) {
+      console.error('Login error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Invalid email or password',

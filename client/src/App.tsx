@@ -110,16 +110,25 @@ function App() {
   }, [isAuthenticated, isPublicRoute, navigate]);
 
   const login = async (email: string, password: string): Promise<User> => {
-    const response = await apiRequest<{ user: User; token: string }>({
-      url: "/api/auth/login",
-      method: "POST",
-      data: { email, password }
-    });
-
-    setUser(response.user);
-    setToken(response.token);
-    localStorage.setItem("token", response.token);
-    return response.user;
+    console.log('App.tsx login function called with:', email, password);
+    try {
+      console.log('Making API request to /api/auth/login');
+      const response = await apiRequest<{ user: User; token: string }>({
+        url: "/api/auth/login",
+        method: "POST",
+        data: { email, password }
+      });
+      
+      console.log('API response received:', response);
+      
+      setUser(response.user);
+      setToken(response.token);
+      localStorage.setItem("token", response.token);
+      return response.user;
+    } catch (error) {
+      console.error('Error in login function:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {

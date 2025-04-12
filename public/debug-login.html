@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin: 10px 0;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 5px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Debug Login</h1>
+  
+  <div>
+    <h2>Login as Admin</h2>
+    <button id="adminLogin">Login as Admin</button>
+  </div>
+
+  <div>
+    <h2>Login as User</h2>
+    <button id="userLogin">Login as User</button>
+  </div>
+
+  <div>
+    <h2>Check Current User</h2>
+    <button id="checkUser">Get Current User</button>
+  </div>
+
+  <h3>Response:</h3>
+  <pre id="response">No response yet</pre>
+
+  <script>
+    document.getElementById('adminLogin').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: 'admin@example.com',
+            password: 'admin123'
+          })
+        });
+        
+        const responseText = await response.text();
+        
+        document.getElementById('response').textContent = 
+          `Status: ${response.status}\n` + 
+          `Status Text: ${response.statusText}\n\n` +
+          `Response Body:\n${responseText}`;
+        
+        try {
+          const data = JSON.parse(responseText);
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+            console.log('Token saved to localStorage');
+          }
+        } catch (e) {
+          console.error('Failed to parse JSON response', e);
+        }
+      } catch (error) {
+        document.getElementById('response').textContent = 'Error: ' + error.message;
+      }
+    });
+
+    document.getElementById('userLogin').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: 'user@example.com',
+            password: 'user123'
+          })
+        });
+        
+        const responseText = await response.text();
+        
+        document.getElementById('response').textContent = 
+          `Status: ${response.status}\n` + 
+          `Status Text: ${response.statusText}\n\n` +
+          `Response Body:\n${responseText}`;
+        
+        try {
+          const data = JSON.parse(responseText);
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+            console.log('Token saved to localStorage');
+          }
+        } catch (e) {
+          console.error('Failed to parse JSON response', e);
+        }
+      } catch (error) {
+        document.getElementById('response').textContent = 'Error: ' + error.message;
+      }
+    });
+
+    document.getElementById('checkUser').addEventListener('click', async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers
+        });
+        
+        const responseText = await response.text();
+        
+        document.getElementById('response').textContent = 
+          `Status: ${response.status}\n` + 
+          `Status Text: ${response.statusText}\n\n` +
+          `Response Body:\n${responseText}`;
+      } catch (error) {
+        document.getElementById('response').textContent = 'Error: ' + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
