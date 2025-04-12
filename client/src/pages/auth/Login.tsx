@@ -53,7 +53,23 @@ export default function Login() {
     console.log('Login attempt with:', data);
     try {
       console.log('Calling login function...');
-      const user = await login(data.email, data.password);
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
+      }
+      
+      const user = result.user;
+      await login(user);
+      
       console.log('Login successful, user:', user);
       toast({
         title: 'Success',
