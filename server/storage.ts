@@ -6,10 +6,12 @@ import {
   Template, 
   InsertTemplate, 
   Catalog, 
-  InsertCatalog 
+  InsertCatalog,
+  User,
+  InsertUser
 } from "@shared/schema";
 import { DEV_MODE, LOAD_SAMPLE_DATA } from '@shared/config';
-import { sampleBusinesses, sampleProducts } from './sampleData';
+import { sampleBusinesses, sampleProducts, sampleUsers } from './sampleData';
 
 // Interface for all storage operations
 export interface IStorage {
@@ -90,6 +92,11 @@ export class MemStorage implements IStorage {
   private loadSampleData() {
     console.log("Loading sample data for development mode...");
     
+    // Add sample users
+    sampleUsers.forEach(user => {
+      this.createUser(user);
+    });
+
     // Add sample businesses
     sampleBusinesses.forEach(business => {
       this.createBusiness(business);
@@ -100,7 +107,86 @@ export class MemStorage implements IStorage {
       this.createProduct(product);
     });
     
-    console.log(`Sample data loaded: ${sampleBusinesses.length} businesses, ${sampleProducts.length} products`);
+    console.log(`Sample data loaded: ${sampleUsers.length} users, ${sampleBusinesses.length} businesses, ${sampleProducts.length} products`);
+  }
+
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const users = Array.from(this.users.values());
+    return users.find(user => user.email.toLowerCase() === email.toLowerCase());
+  }
+
+  async getUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const id = this.currentUserId++;
+    const now = new Date();
+    
+    const newUser: User = {
+      ...user,
+      id,
+      resetToken: null,
+      resetTokenExpiry: null,
+      lastLogin: null,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.users.set(id, newUser);
+    return newUser;
+  }
+
+  async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> {
+    const existingUser = this.users.get(id);
+    if (!existingUser) return undefined;
+
+    const updatedUser = { 
+      ...existingUser, 
+      ...user,
+      updatedAt: new Date() 
+    };
+    
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserPassword(id: number, password: string): Promise<boolean> {
+    const user = this.users.get(id);
+    if (!user) return false;
+    
+    const updatedUser = {
+      ...user,
+      password,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(id, updatedUser);
+    return true;
+  }
+
+  async updateUserResetToken(email: string, token: string, expiry: Date): Promise<boolean> {
+    const user = await this.getUserByEmail(email);
+    if (!user) return false;
+
+    const updatedUser = {
+      ...user,
+      resetToken: token,
+      resetTokenExpiry: expiry,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(user.id, updatedUser);
+    return true;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    return this.users.delete(id);
   }
 
   // Business methods

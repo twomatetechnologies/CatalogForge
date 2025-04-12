@@ -1,5 +1,6 @@
-import { Business, Product, InsertBusiness, InsertProduct } from '@shared/schema';
+import { Business, Product, InsertBusiness, InsertProduct, InsertUser } from '@shared/schema';
 import { DEFAULT_BUSINESS_ID } from '@shared/config';
+import bcrypt from 'bcryptjs';
 
 export const sampleBusinesses: InsertBusiness[] = [
   {
@@ -39,6 +40,26 @@ export const sampleBusinesses: InsertBusiness[] = [
         defaultOrientation: "landscape"
       }
     }
+  }
+];
+
+// Generate hashed passwords for sample users
+const salt = bcrypt.genSaltSync(10);
+const hashedAdminPassword = bcrypt.hashSync('admin123', salt);
+const hashedUserPassword = bcrypt.hashSync('user123', salt);
+
+export const sampleUsers: InsertUser[] = [
+  {
+    name: "Admin User",
+    email: "admin@example.com",
+    password: hashedAdminPassword,
+    role: "admin"
+  },
+  {
+    name: "Regular User",
+    email: "user@example.com",
+    password: hashedUserPassword,
+    role: "user"
   }
 ];
 

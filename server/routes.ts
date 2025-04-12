@@ -8,8 +8,10 @@ import {
   insertBusinessSchema, 
   insertProductSchema, 
   insertTemplateSchema, 
-  insertCatalogSchema 
+  insertCatalogSchema,
+  insertUserSchema
 } from "@shared/schema";
+import { isAuthenticated, isAdmin } from "./auth";
 import { DEFAULT_BUSINESS_ID } from "@shared/config";
 import { z } from "zod";
 
