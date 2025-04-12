@@ -15,32 +15,74 @@ export async function apiRequest<T = any>(options: {
 }): Promise<T> {
   const { url, method, data, headers = {} } = options;
   
-  // Add content-type header if data is provided
-  if (data && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
-  }
-  
-  // Add authorization header if token exists in localStorage
-  const token = localStorage.getItem('token');
-  if (token && !headers['Authorization']) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  try {
+    console.log('API Request:', method, url, data);
+    
+    // Add content-type header if data is provided
+    if (data && !headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+    
+    // Add authorization header if token exists in localStorage
+    const token = localStorage.getItem('token');
+    if (token && !headers['Authorization']) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
 
-  await throwIfResNotOk(res);
-  
-  // For 204 No Content, return empty object
-  if (res.status === 204) {
-    return {} as T;
+    console.log('API Response status:', res.status);
+    
+    // Check for non-OK status and throw error with message
+    if (!res.ok) {
+      const contentType = res.headers.get('content-type');
+      let errorMessage = res.statusText || 'Unknown error';
+      
+      if (contentType && contentType.includes('application/json')) {
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('Error parsing JSON error response:', e);
+        }
+      } else {
+        try {
+          const textError = await res.text();
+          if (textError) errorMessage = textError;
+        } catch (e) {
+          console.error('Error reading error response text:', e);
+        }
+      }
+      
+      const error = new Error(errorMessage);
+      // @ts-ignore
+      error.status = res.status;
+      throw error;
+    }
+    
+    // For 204 No Content, return empty object
+    if (res.status === 204) {
+      return {} as T;
+    }
+    
+    // For all other success responses, parse JSON
+    try {
+      const jsonResponse = await res.json();
+      console.log('API Response data:', jsonResponse);
+      return jsonResponse;
+    } catch (e) {
+      console.error('Error parsing JSON response:', e);
+      throw new Error('Failed to parse response from server');
+    }
+  } catch (error) {
+    console.error('API Request failed:', error);
+    throw error;
   }
-  
-  return await res.json();
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -49,16 +91,67 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
-      credentials: "include",
-    });
+    try {
+      console.log('Query request:', queryKey[0]);
+      
+      // Add authorization header if token exists in localStorage
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const res = await fetch(queryKey[0] as string, {
+        credentials: "include",
+        headers
+      });
+      
+      console.log('Query response status:', res.status);
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
+
+      // Check for non-OK status and throw error with message
+      if (!res.ok) {
+        const contentType = res.headers.get('content-type');
+        let errorMessage = res.statusText || 'Unknown error';
+        
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await res.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            console.error('Error parsing JSON error response:', e);
+          }
+        } else {
+          try {
+            const textError = await res.text();
+            if (textError) errorMessage = textError;
+          } catch (e) {
+            console.error('Error reading error response text:', e);
+          }
+        }
+        
+        const error = new Error(errorMessage);
+        // @ts-ignore
+        error.status = res.status;
+        throw error;
+      }
+      
+      // Parse JSON response
+      try {
+        const jsonResponse = await res.json();
+        console.log('Query response data:', jsonResponse);
+        return jsonResponse;
+      } catch (e) {
+        console.error('Error parsing JSON response:', e);
+        throw new Error('Failed to parse response from server');
+      }
+    } catch (error) {
+      console.error('Query request failed:', error);
+      throw error;
     }
-
-    await throwIfResNotOk(res);
-    return await res.json();
   };
 
 export const queryClient = new QueryClient({
