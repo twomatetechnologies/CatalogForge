@@ -136,37 +136,50 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
   
   // Auth routes
-  app.post('/api/auth/login', (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
       
       if (!user) {
         return res.status(401).json({
-          message: info.message || 'Authentication failed'
+          message: 'Invalid email or password'
+        });
+      }
+      
+      // Compare password
+      const isMatch = await bcrypt.compare(password, user.password);
+      
+      if (!isMatch) {
+        return res.status(401).json({
+          message: 'Invalid email or password'
         });
       }
       
       // Generate JWT token
       const token = generateToken(user);
       
-      // Log the user in
-      req.login(user, (err) => {
-        if (err) {
-          return next(err);
-        }
-        
-        // Don't send the password back to the client
-        const userWithoutPassword = { ...user };
-        delete userWithoutPassword.password;
-        
-        return res.json({
-          user: userWithoutPassword,
-          token
-        });
+      // Update last login time
+      await storage.updateUser(user.id, {
+        lastLogin: new Date()
       });
-    })(req, res, next);
+      
+      // Don't send password back to client
+      const userWithoutPassword = { ...user };
+      delete userWithoutPassword.password;
+      
+      return res.json({
+        user: userWithoutPassword,
+        token
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      return res.status(500).json({
+        message: 'Internal server error'
+      });
+    }
   });
   
   // Logout route
