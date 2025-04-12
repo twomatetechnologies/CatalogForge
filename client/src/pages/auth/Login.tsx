@@ -67,8 +67,15 @@ export default function Login() {
         throw new Error(result.message || 'Login failed');
       }
       
-      const user = result.user;
-      await login(user);
+      if (!result.user || !result.token) {
+        throw new Error('Invalid response from server');
+      }
+
+      // Store the token
+      localStorage.setItem('token', result.token);
+      
+      // Login with the user data
+      await login(result.user);
       
       console.log('Login successful, user:', user);
       toast({
