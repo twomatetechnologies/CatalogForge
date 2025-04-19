@@ -49,7 +49,7 @@ export const AuthContext = createContext<{
   setToken: () => {},
   isAuthenticated: false,
   login: async () => {
-    throw new Error("Not implemented");
+   // throw new Error("Not implemented");
   },
   logout: () => {},
   isAdmin: false,
