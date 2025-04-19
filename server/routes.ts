@@ -992,8 +992,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update label settings (temporarily allowing public access for testing)
-  app.put('/api/settings/labels', async (req, res) => {
+  // Update label settings (admin only)
+  app.put('/api/settings/labels', isAuthenticated, isAdmin, async (req, res) => {
     try {
       // Validate the incoming data
       if (!req.body || !req.body.product) {
