@@ -89,7 +89,7 @@ export default function CatalogCreate() {
       name: "",
       description: "",
       businessId: DEFAULT_BUSINESS_ID,
-      templateId: 0, // Will be set when user selects a template
+      templateId: templates && templates.length > 0 ? templates[0].id : 1, // Set first template as default
       productIds: [],
       status: "draft",
       settings: {
