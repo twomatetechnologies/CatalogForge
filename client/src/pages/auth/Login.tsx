@@ -53,29 +53,7 @@ export default function Login() {
     console.log('Login attempt with:', data);
     try {
       console.log('Calling login function...');
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.message || 'Login failed');
-      }
-      
-      if (!result.user || !result.token) {
-        throw new Error('Invalid response from server');
-      }
-
-      // Store the token
-      localStorage.setItem('token', result.token);
-      
-      // Login with the user data
-      await login(result.user);
+      const user = await login(data.email, data.password);
       
       console.log('Login successful, user:', user);
       toast({
@@ -83,6 +61,9 @@ export default function Login() {
         description: 'You have successfully logged in',
         variant: 'default',
       });
+      
+      // Note: No need to redirect here, App.tsx has a useEffect that will
+      // automatically redirect authenticated users away from public routes
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
