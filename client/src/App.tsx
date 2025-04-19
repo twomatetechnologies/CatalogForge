@@ -121,9 +121,18 @@ function App() {
       
       console.log('API response received:', response);
       
+      if (!response.user || !response.token) {
+        console.error('Invalid response format:', response);
+        throw new Error('Invalid response from server');
+      }
+      
       setUser(response.user);
       setToken(response.token);
       localStorage.setItem("token", response.token);
+      
+      // Force redirect to dashboard after successful login
+      navigate('/');
+      
       return response.user;
     } catch (error) {
       console.error('Error in login function:', error);

@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Link } from 'wouter';
 import { AuthContext } from '../../App';
 import { useToast } from '@/hooks/use-toast';
+import { User } from '@/types';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -37,7 +38,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useContext(AuthContext);
+  const { login, setUser, setToken } = useContext(AuthContext);
   const { toast } = useToast();
 
   const form = useForm<LoginFormValues>({
@@ -52,18 +53,37 @@ export default function Login() {
     setIsLoading(true);
     console.log('Login attempt with:', data);
     try {
-      console.log('Calling login function...');
-      const user = await login(data.email, data.password);
+      // Make a direct API call to get more control over the process
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
       
-      console.log('Login successful, user:', user);
+      const result = await response.json();
+      console.log('Login API direct response:', result);
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Login failed');
+      }
+      
+      // Store the token
+      localStorage.setItem('token', result.token);
+      
+      // Update auth context
+      setUser(result.user);
+      setToken(result.token);
+      
       toast({
         title: 'Success',
         description: 'You have successfully logged in',
         variant: 'default',
       });
       
-      // Note: No need to redirect here, App.tsx has a useEffect that will
-      // automatically redirect authenticated users away from public routes
+      // Force navigation to dashboard
+      window.location.href = '/';
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
