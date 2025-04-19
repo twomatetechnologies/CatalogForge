@@ -9,6 +9,7 @@ import { queryClient } from "@/lib/queryClient";
 import { insertProductSchema } from "@shared/schema";
 import { Product, BusinessProfile } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { useSettings } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import { 
   Form,
@@ -32,6 +33,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeftIcon, SaveIcon, XIcon, UploadIcon } from "lucide-react";
+import { EditableLabel } from "@/components/ui/EditableLabel";
 
 // Extend the schema with validation rules
 const formSchema = insertProductSchema
@@ -301,7 +303,7 @@ export default function ProductForm() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Product Name*</FormLabel>
+                          <FormLabel><EditableLabel labelKey="name" defaultText="Product Name" />*</FormLabel>
                           <FormControl>
                             <Input placeholder="Enter product name" {...field} />
                           </FormControl>

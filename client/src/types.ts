@@ -6,5 +6,8 @@ export interface User extends SchemaUser {
   // Add any client-specific properties here if needed
 }
 
+// BusinessProfile type for client-side use
+export type BusinessProfile = Business;
+
 // Re-export other types
 export type { Business, Product, Template, Catalog };
