@@ -477,6 +477,27 @@ export class MemStorage implements IStorage {
       this.createTemplate(template);
     });
   }
+
+  // Settings methods
+  async getSettings(): Promise<AppSettings> {
+    // Return a copy to avoid direct mutation
+    return JSON.parse(JSON.stringify(this.settings));
+  }
+
+  async updateSettings(settings: Partial<AppSettings>): Promise<AppSettings> {
+    // Deep merge settings
+    if (settings.product) {
+      this.settings.product = {
+        ...this.settings.product,
+        ...settings.product
+      };
+    }
+
+    // Add other settings types here when needed
+    
+    // Return a copy of the updated settings
+    return JSON.parse(JSON.stringify(this.settings));
+  }
 }
 
 // Create and export the storage instance

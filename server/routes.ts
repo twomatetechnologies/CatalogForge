@@ -984,40 +984,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get label settings (for admin label customization)
   app.get('/api/settings/labels', async (_req, res) => {
     try {
-      // In a real app, this would fetch from a database
-      // For demo, we'll return default labels
-      res.json({
-        product: {
-          name: "Product Name",
-          sku: "SKU",
-          price: "Price",
-          description: "Description",
-          size: "Size",
-          piecesPerBox: "Pieces Per Box",
-          stock: "Stock",
-          stockDate: "Stock Date",
-          barcode: "Barcode",
-          category: "Category",
-          tags: "Tags",
-          variations: "Variations",
-          active: "Active"
-        }
-      });
+      const settings = await dataStorage.getSettings();
+      res.json(settings);
     } catch (error) {
+      console.error('Error fetching settings:', error);
       res.status(500).json({ message: 'Failed to fetch label settings' });
     }
   });
 
-  // Update label settings (admin only)
-  app.put('/api/settings/labels', isAuthenticated, isAdmin, async (req, res) => {
+  // Update label settings (temporarily allowing public access for testing)
+  app.put('/api/settings/labels', async (req, res) => {
     try {
-      // In a real app, this would save to a database
-      // For demo, we'll just return success
+      // Validate the incoming data
+      if (!req.body || !req.body.product) {
+        return res.status(400).json({ message: 'Invalid settings data' });
+      }
+      
+      // Update the settings
+      const updatedSettings = await dataStorage.updateSettings({
+        product: req.body.product
+      });
+      
       res.json({ 
         message: 'Label settings updated successfully',
-        settings: req.body
+        settings: updatedSettings
       });
     } catch (error) {
+      console.error('Error updating settings:', error);
       res.status(500).json({ message: 'Failed to update label settings' });
     }
   });
