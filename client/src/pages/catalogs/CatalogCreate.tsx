@@ -89,7 +89,7 @@ export default function CatalogCreate() {
       name: "",
       description: "",
       businessId: DEFAULT_BUSINESS_ID,
-      templateId: templates && templates.length > 0 ? templates[0].id : 1, // Set first template as default
+      templateId: 1, // Default to first template (will be updated when templates load)
       productIds: [],
       status: "draft",
       settings: {
@@ -105,7 +105,19 @@ export default function CatalogCreate() {
   // Create catalog mutation
   const createCatalog = useMutation({
     mutationFn: async (values: FormValues) => {
-      return apiRequest('POST', '/api/catalogs', values);
+      console.log("Submitting catalog with values:", values);
+      try {
+        const response = await apiRequest({
+          url: '/api/catalogs',
+          method: 'POST',
+          data: values
+        });
+        console.log("Catalog creation response:", response);
+        return response;
+      } catch (error) {
+        console.error("Catalog creation error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -119,20 +131,32 @@ export default function CatalogCreate() {
       // Redirect to catalogs page
       navigate('/catalogs');
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Catalog creation error in onError:", error);
       toast({
         title: "Error",
-        description: "Failed to create catalog",
+        description: error.message || "Failed to create catalog. Please check form values and try again.",
         variant: "destructive"
       });
-      console.error(error);
     }
   });
   
   // Update catalog mutation
   const updateCatalog = useMutation({
     mutationFn: async (values: FormValues) => {
-      return apiRequest('PUT', `/api/catalogs/${catalogId}`, values);
+      console.log("Updating catalog with values:", values);
+      try {
+        const response = await apiRequest({
+          url: `/api/catalogs/${catalogId}`,
+          method: 'PUT',
+          data: values
+        });
+        console.log("Catalog update response:", response);
+        return response;
+      } catch (error) {
+        console.error("Catalog update error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -147,13 +171,13 @@ export default function CatalogCreate() {
       // Redirect to catalogs page
       navigate('/catalogs');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to update catalog",
+        description: error.message || "Failed to update catalog. Please check form values and try again.",
         variant: "destructive"
       });
-      console.error(error);
+      console.error("Catalog update error in onError:", error);
     }
   });
   
@@ -247,6 +271,14 @@ export default function CatalogCreate() {
       });
     }
   }, [catalogData, isEditing, form]);
+  
+  // Set first template as default when templates load
+  useEffect(() => {
+    if (templates && templates.length > 0 && !isEditing) {
+      // Only set if we're creating a new catalog
+      form.setValue("templateId", templates[0].id);
+    }
+  }, [templates, form, isEditing]);
 
   if (templatesLoading || businessLoading || productsLoading || (isEditing && catalogLoading)) {
     return <div className="p-4">Loading...</div>;
