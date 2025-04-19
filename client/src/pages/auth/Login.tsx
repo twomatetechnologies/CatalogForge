@@ -82,8 +82,11 @@ export default function Login() {
         variant: 'default',
       });
       
-      // Navigate to dashboard using wouter
-      setLocation('/');
+      // Force hard redirect to dashboard
+      // This bypasses any router issues
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
