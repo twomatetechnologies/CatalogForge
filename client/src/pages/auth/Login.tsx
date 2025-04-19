@@ -2,10 +2,9 @@ import { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { AuthContext } from '../../App';
 import { useToast } from '@/hooks/use-toast';
-import { User } from '@/types';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -38,8 +37,9 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
-  const { login, setUser, setToken } = useContext(AuthContext);
+  const { setUser, setToken } = useContext(AuthContext);
   const { toast } = useToast();
+  const [location, setLocation] = useLocation();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -82,8 +82,8 @@ export default function Login() {
         variant: 'default',
       });
       
-      // Force navigation to dashboard
-      window.location.href = '/';
+      // Navigate to dashboard using wouter
+      setLocation('/');
     } catch (error: any) {
       console.error('Login error:', error);
       toast({
