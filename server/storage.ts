@@ -13,6 +13,27 @@ import {
 import { DEV_MODE, LOAD_SAMPLE_DATA } from '@shared/config';
 import { sampleBusinesses, sampleProducts, sampleUsers } from './sampleData';
 
+// Interface for settings types
+export interface ProductLabelSettings {
+  name: string;
+  sku: string;
+  price: string;
+  description: string;
+  size: string;
+  piecesPerBox: string;
+  stock: string;
+  stockDate: string;
+  barcode: string;
+  category: string;
+  tags: string;
+  variations: string;
+  active: string;
+}
+
+export interface AppSettings {
+  product: ProductLabelSettings;
+}
+
 // Interface for all storage operations
 export interface IStorage {
   // User operations
@@ -52,6 +73,10 @@ export interface IStorage {
   createCatalog(catalog: InsertCatalog): Promise<Catalog>;
   updateCatalog(id: number, catalog: Partial<InsertCatalog>): Promise<Catalog | undefined>;
   deleteCatalog(id: number): Promise<boolean>;
+  
+  // Settings operations
+  getSettings(): Promise<AppSettings>;
+  updateSettings(settings: Partial<AppSettings>): Promise<AppSettings>;
 }
 
 // In-memory storage implementation
@@ -61,6 +86,7 @@ export class MemStorage implements IStorage {
   private products: Map<number, Product>;
   private templates: Map<number, Template>;
   private catalogs: Map<number, Catalog>;
+  private settings: AppSettings;
   private currentUserId: number;
   private currentBusinessId: number;
   private currentProductId: number;
@@ -78,6 +104,25 @@ export class MemStorage implements IStorage {
     this.currentProductId = 1;
     this.currentTemplateId = 1;
     this.currentCatalogId = 1;
+    
+    // Initialize default settings
+    this.settings = {
+      product: {
+        name: "Product Name",
+        sku: "SKU",
+        price: "Price",
+        description: "Description",
+        size: "Size",
+        piecesPerBox: "Pieces Per Box",
+        stock: "Stock",
+        stockDate: "Stock Date",
+        barcode: "Barcode",
+        category: "Category",
+        tags: "Tags",
+        variations: "Variations",
+        active: "Active"
+      }
+    };
 
     // Initialize with some default templates
     this.initializeTemplates();
