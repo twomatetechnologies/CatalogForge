@@ -21,9 +21,23 @@ export function useLabels(): UseQueryResult<AppSettings> & {
   // Mutation to update a label
   const mutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      return await apiRequest("PUT", "/api/settings/labels", {
-        product: { [key]: value },
+      const response = await fetch("/api/settings/labels", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          product: { [key]: value },
+        }),
+        credentials: "include",
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update label settings");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       // Invalidate the query to refetch the latest data
